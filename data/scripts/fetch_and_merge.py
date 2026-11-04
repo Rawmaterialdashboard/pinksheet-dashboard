@@ -5,7 +5,7 @@ import datetime
 import requests
 import pandas as pd
 
-# 1. 目标页面与底层关联文件直链（基于 thedocs.worldbank.org 18675f1d1639c7a34d463f59263ba0a2-0050012025）
+# 1. 目标页面与底层关联文件直链
 DOC_ID = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
 BASE_URL = f"https://thedocs.worldbank.org/en/doc/{DOC_ID}"
 
@@ -14,10 +14,9 @@ MONTHLY_XLSX_URL = f"{BASE_URL}/related/CMO-Historical-Data-Monthly.xlsx"
 ANNUAL_XLSX_URL = f"{BASE_URL}/related/CMO-Historical-Data-Annual.xlsx"
 LATEST_PDF_URL = f"{BASE_URL}/related/CMO-Pink-Sheet-January-2026.pdf"
 
-MANUAL_CSV_PATH = "data/manual_metrics.csv"
 OUTPUT_JSON_PATH = "data/dashboard_data.json"
 
-# Monthly Prices 表头字段映射
+# 2. 世界银行 Monthly Prices 表头字段映射（仅保留 6 项原生商品）
 COLUMN_MAPPING = {
     "Gold": "Gold",
     "Aluminum": "Aluminium",
@@ -40,7 +39,7 @@ def scrape_pink_sheet_monthly():
     first_col = df.columns[0]
     df.rename(columns={first_col: "RawDate"}, inplace=True)
 
-    # 过滤掉单位行（第 6 行）和空行，解析类似 2016M06 的日期格式
+    # 过滤掉单位行和空行，解析类似 2016M06 的日期格式
     df["DateObj"] = pd.to_datetime(df["RawDate"].astype(str), format="%YM%m", errors="coerce")
     df = df.dropna(subset=["DateObj"]).copy()
 
@@ -64,22 +63,9 @@ def scrape_pink_sheet_monthly():
     merged.drop(columns=["DateObj", "Year", "Month"], inplace=True)
     return merged
 
-def merge_with_supplement(df_wb):
-    if os.path.exists(MANUAL_CSV_PATH):
-        sup = pd.read_csv(MANUAL_CSV_PATH)
-        sup["Date"] = sup["Date"].astype(str).str.strip()
-        if "Steel_Custom" in sup.columns and "Steel" not in sup.columns:
-            sup.rename(columns={"Steel_Custom": "Steel"}, inplace=True)
-        df_wb = pd.merge(df_wb, sup, on="Date", how="left")
-    else:
-        df_wb["Tungsten"] = None
-        df_wb["Steel"] = None
-    return df_wb
-
 if __name__ == "__main__":
     os.makedirs("data", exist_ok=True)
-    wb_df = scrape_pink_sheet_monthly()
-    final_df = merge_with_supplement(wb_df)
+    final_df = scrape_pink_sheet_monthly()
 
     payload = {
         "metadata": {
