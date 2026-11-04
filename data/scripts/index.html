@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raw Material Metals Dashboard (World Bank & Custom)</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #f4f6fa;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 24px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .card-price {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    .sparkline {
+      height: 100px;
+      width: 100%;
+    }
+    .table-container {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>📈 Raw Material Benchmark History (2016–2023 Semi-Annual | 2024–Now Monthly)</h2>
+    <div id="last-update" style="font-size: 13px; color: var(--text-muted);">正在加载最新数据...</div>
+  </div>
+
+  <div class="grid" id="metrics-grid"></div>
+
+  <div class="table-container">
+    <h3 style="margin-top: 0; font-size: 15px;">历史基准报价表</h3>
+    <table id="history-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Gold ($/toz)</th>
+          <th>Aluminium ($/mt)</th>
+          <th>Copper ($/mt)</th>
+          <th>Tin ($/mt)</th>
+          <th>Silver ($/toz)</th>
+          <th>Rubber ($/kg)</th>
+          <th>Tungsten (Manual)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const METRICS = [
+      { key: 'Gold', label: 'Gold', unit: '$/toz', color: '#eab308' },
+      { key: 'Aluminium', label: 'Aluminium A00', unit: '$/mt', color: '#3b82f6' },
+      { key: 'Copper', label: 'Copper', unit: '$/mt', color: '#f97316' },
+      { key: 'Tin', label: 'Tin', unit: '$/mt', color: '#a855f7' },
+      { key: 'Silver', label: 'Silver', unit: '$/toz', color: '#06b6d4' },
+      { key: 'Rubber', label: 'Rubber', unit: '$/kg', color: '#22c55e' },
+      { key: 'Tungsten', label: 'Tungsten', unit: 'Manual', color: '#6366f1' }
+    ];
+
+    async function initDashboard() {
+      try {
+        const response = await fetch('data/dashboard_data.json');
+        const data = await response.json();
+        
+        if (!data || data.length === 0) return;
+
+        const latest = data[data.length - 1];
+        document.getElementById('last-update').innerText = `最新数据周期: ${latest.Date}`;
+
+        const grid = document.getElementById('metrics-grid');
+        grid.innerHTML = '';
+
+        // 渲染顶部卡片和微折线图
+        METRICS.forEach(metric => {
+          const val = latest[metric.key] !== null && latest[metric.key] !== undefined ? latest[metric.key] : '--';
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="card-title">
+              <span>${metric.label}</span>
+              <span>${metric.unit}</span>
+            </div>
+            <div class="card-price">${typeof val === 'number' ? val.toLocaleString() : val}</div>
+            <div class="sparkline" id="chart-${metric.key}"></div>
+          `;
+          grid.appendChild(card);
+
+          // 绘制折线图
+          const chartDom = document.getElementById(`chart-${metric.key}`);
+          const myChart = echarts.init(chartDom);
+          const xData = data.map(d => d.Date);
+          const yData = data.map(d => d[metric.key]);
+
+          myChart.setOption({
+            grid: { left: 0, right: 0, top: 5, bottom: 0 },
+            xAxis: { type: 'category', data: xData, show: false },
+            yAxis: { type: 'value', min: 'dataMin', show: false },
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}' },
+            series: [{
+              data: yData,
+              type: 'line',
+              smooth: true,
+              showSymbol: false,
+              lineStyle: { color: metric.color, width: 2 },
+              areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: metric.color + '44' },
+                  { offset: 1, color: metric.color + '00' }
+                ])
+              }
+            }]
+          });
+        });
+
+        // 渲染表格（倒序展示，最新在最上方）
+        const tbody = document.querySelector('#history-table tbody');
+        const reversed = [...data].reverse();
+        reversed.slice(0, 15).forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.Date}</td>
+            <td>${row.Gold ? '$' + row.Gold.toLocaleString() : '-'}</td>
+            <td>${row.Aluminium ? '$' + row.Aluminium.toLocaleString() : '-'}</td>
+            <td>${row.Copper ? '$' + row.Copper.toLocaleString() : '-'}</td>
+            <td>${row.Tin ? '$' + row.Tin.toLocaleString() : '-'}</td>
+            <td>${row.Silver ? '$' + row.Silver.toLocaleString() : '-'}</td>
+            <td>${row.Rubber ? '$' + row.Rubber.toLocaleString() : '-'}</td>
+            <td>${row.Tungsten ? row.Tungsten.toLocaleString() : '-'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error('加载数据失败:', err);
+        document.getElementById('last-update').innerText = '数据加载失败，请检查 dashboard_data.json 是否已生成。';
+      }
+    }
+
+    window.onload = initDashboard;
+  </script>
+</body>
+</html>
