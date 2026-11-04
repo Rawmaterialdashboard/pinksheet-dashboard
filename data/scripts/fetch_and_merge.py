@@ -5,7 +5,7 @@ import datetime
 import requests
 import pandas as pd
 
-# 1. 目标页面与底层关联文件直链
+# 1. Target Portal & Underlying Related File Direct URLs
 DOC_ID = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
 BASE_URL = f"https://thedocs.worldbank.org/en/doc/{DOC_ID}"
 
@@ -16,7 +16,7 @@ LATEST_PDF_URL = f"{BASE_URL}/related/CMO-Pink-Sheet-January-2026.pdf"
 
 OUTPUT_JSON_PATH = "data/dashboard_data.json"
 
-# 2. 世界银行 Monthly Prices 表头字段映射（仅保留 6 项原生商品）
+# 2. World Bank "Monthly Prices" Sheet Column Mapping (6 Native Commodities)
 COLUMN_MAPPING = {
     "Gold": "Gold",
     "Aluminum": "Aluminium",
@@ -27,23 +27,23 @@ COLUMN_MAPPING = {
 }
 
 def scrape_pink_sheet_monthly():
-    print(f"正在抓取底层月度 Excel 文件: {MONTHLY_XLSX_URL}")
+    print(f"Downloading underlying monthly Excel file: {MONTHLY_XLSX_URL}")
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
     resp = requests.get(MONTHLY_XLSX_URL, headers=headers, timeout=60)
     resp.raise_for_status()
 
-    # 读取 Monthly Prices 工作表（第 5 行为列名，即 skiprows=4）
+    # Read "Monthly Prices" worksheet (Row 5 contains headers, so skiprows=4)
     df = pd.read_excel(io.BytesIO(resp.content), sheet_name="Monthly Prices", skiprows=4)
     first_col = df.columns[0]
     df.rename(columns={first_col: "RawDate"}, inplace=True)
 
-    # 过滤掉单位行和空行，解析类似 2016M06 的日期格式
+    # Filter out unit rows and empty rows; parse dates formatted as 2016M06
     df["DateObj"] = pd.to_datetime(df["RawDate"].astype(str), format="%YM%m", errors="coerce")
     df = df.dropna(subset=["DateObj"]).copy()
 
-    # 匹配所需商品列
+    # Match required commodity columns
     selected = {"DateObj": df["DateObj"]}
     for wb_col, target_col in COLUMN_MAPPING.items():
         matched = [c for c in df.columns if str(c).strip().startswith(wb_col)]
@@ -54,7 +54,7 @@ def scrape_pink_sheet_monthly():
     out_df["Year"] = out_df["DateObj"].dt.year
     out_df["Month"] = out_df["DateObj"].dt.month
 
-    # 时间过滤与采样规则：2016-2023 半年度(6月, 12月)，2024+ 月度
+    # Time filtering & sampling rules: 2016-2023 Semi-Annual (June & Dec), 2024+ Monthly
     df_semi = out_df[(out_df["Year"] >= 2016) & (out_df["Year"] <= 2023) & (out_df["Month"].isin([6, 12]))]
     df_monthly = out_df[out_df["Year"] >= 2024]
 
@@ -83,4 +83,4 @@ if __name__ == "__main__":
     with open(OUTPUT_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    print(f"抓取完成！共输出 {len(final_df)} 条记录至 {OUTPUT_JSON_PATH}")
+    print(f"Scraping completed! Exported {len(final_df)} records to {OUTPUT_JSON_PATH}")
