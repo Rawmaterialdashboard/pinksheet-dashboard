@@ -60,79 +60,106 @@
       color: #0f172a;
       cursor: pointer;
     }
-    /* Underlying Links & Files Panel */
-    .source-panel {
+    /* Compact Source Action Bar with Buttons */
+    .source-bar {
       background: #ffffff;
       border-radius: 12px;
-      padding: 16px 24px;
-      border: 1px solid #cbd5e1;
-      border-left: 5px solid #2563eb;
+      padding: 12px 24px;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #2563eb;
       margin-bottom: 20px;
-      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
-    }
-    .source-panel-header {
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 14px;
     }
-    .source-panel-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1e3a8a;
+    .source-bar-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .source-bar-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .badge {
       background: #dbeafe;
       color: #1d4ed8;
       font-size: 11px;
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 999px;
       font-weight: 700;
     }
-    .source-files-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    .sync-time {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .source-buttons {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      font-size: 12.5px;
+      flex-wrap: wrap;
     }
-    .source-item {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+    .src-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
       border-radius: 8px;
-      padding: 8px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .source-item-label {
-      font-weight: 700;
-      color: #334155;
-      display: flex;
-      justify-content: space-between;
-    }
-    .source-item a {
-      color: #2563eb;
+      font-size: 12.5px;
+      font-weight: 600;
       text-decoration: none;
-      word-break: break-all;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 11.5px;
+      transition: all 0.15s ease;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+      cursor: pointer;
     }
-    .source-item a:hover {
-      text-decoration: underline;
+    .src-btn:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
     }
-    /* 4x2 Cards Grid */
+    .src-btn.primary {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+    .src-btn.primary:hover {
+      background: #dbeafe;
+    }
+    .src-btn.excel {
+      background: #f0fdf4;
+      color: #15803d;
+      border-color: #bbf7d0;
+    }
+    .src-btn.excel:hover {
+      background: #dcfce7;
+    }
+    .src-btn.pdf {
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+    .src-btn.pdf:hover {
+      background: #fee2e2;
+    }
+    /* 3x2 Cards Grid for 6 World Bank Metrics */
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 18px;
       margin-bottom: 24px;
     }
-    @media (max-width: 1200px) {
+    @media (max-width: 1024px) {
       .cards-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -269,58 +296,30 @@
       </div>
     </div>
 
-    <!-- Underlying World Bank Pink Sheet Links & Files Display -->
-    <div class="source-panel">
-      <div class="source-panel-header">
-        <div class="source-panel-title">
-          <span>🔗 World Bank Pink Sheet 抓取底层链接地址与关联文件清单 (Underlying Data Sources & Files)</span>
-          <span class="badge" id="sync-status">已同步官方底层文件</span>
-        </div>
-        <div style="font-size: 12px; color: #64748b;" id="last-updated-text">
-          Target Doc ID: 18675f1d1639c7a34d463f59263ba0a2-0050012025
-        </div>
+    <!-- Sleek Button Bar for World Bank Pink Sheet Data Sources -->
+    <div class="source-bar">
+      <div class="source-bar-left">
+        <span class="source-bar-title">🔗 World Bank Pink Sheet 官方数据源</span>
+        <span class="badge">已同步底层文件</span>
+        <span class="sync-time" id="last-updated-text">Doc ID: 18675f1d1639c7a34d463f59263ba0a2-0050012025</span>
       </div>
-      <div class="source-files-grid">
-        <div class="source-item">
-          <div class="source-item-label">
-            <span>1. 官方粉单发布主页 (Target Portal Page)</span>
-            <span style="color:#2563eb;">HTML Portal</span>
-          </div>
-          <a id="link-portal" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/" target="_blank" rel="noopener">
-            https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/
-          </a>
-        </div>
-        <div class="source-item">
-          <div class="source-item-label">
-            <span>2. 月度历史价格底层抓取文件 (Monthly Historical Data Excel - Sheet: "Monthly Prices")</span>
-            <span style="color:#16a34a;">Primary .XLSX</span>
-          </div>
-          <a id="link-monthly-xlsx" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx" target="_blank" rel="noopener">
-            https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx
-          </a>
-        </div>
-        <div class="source-item">
-          <div class="source-item-label">
-            <span>3. 年度历史价格底层抓取文件 (Annual Historical Data Excel - Sheet: "Annual Prices")</span>
-            <span style="color:#0284c7;">Related .XLSX</span>
-          </div>
-          <a id="link-annual-xlsx" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx" target="_blank" rel="noopener">
-            https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx
-          </a>
-        </div>
-        <div class="source-item">
-          <div class="source-item-label">
-            <span>4. 最新月度粉单公报 PDF 文件 (Latest Monthly Pink Sheet PDF Report)</span>
-            <span style="color:#dc2626;">Related .PDF</span>
-          </div>
-          <a id="link-pdf" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Pink-Sheet-January-2026.pdf" target="_blank" rel="noopener">
-            https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Pink-Sheet-January-2026.pdf
-          </a>
-        </div>
+      <div class="source-buttons">
+        <a id="link-portal" class="src-btn primary" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/" target="_blank" rel="noopener">
+          🌐 官方发布主页
+        </a>
+        <a id="link-monthly-xlsx" class="src-btn excel" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx" target="_blank" rel="noopener">
+          📥 月度历史数据 (.xlsx)
+        </a>
+        <a id="link-annual-xlsx" class="src-btn" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx" target="_blank" rel="noopener">
+          📊 年度历史数据 (.xlsx)
+        </a>
+        <a id="link-pdf" class="src-btn pdf" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Pink-Sheet-January-2026.pdf" target="_blank" rel="noopener">
+          📄 最新月度公报 (.pdf)
+        </a>
       </div>
     </div>
 
-    <!-- 8 Metal Cards Grid -->
+    <!-- 6 Pure World Bank Metal Cards Grid (3x2) -->
     <div class="cards-grid" id="cards-container"></div>
 
     <!-- Historical Data Table -->
@@ -335,8 +334,6 @@
               <th>Aluminium A00 ($/mt)</th>
               <th>Copper ($/mt)</th>
               <th>Tin ($/mt)</th>
-              <th>Tungsten ($/mtu)</th>
-              <th>Steel ($/mt)</th>
               <th>Rubber ($/kg)</th>
               <th>Silver ($/toz)</th>
             </tr>
@@ -353,65 +350,63 @@
       { key: "Aluminium", label: "Aluminium A00", unit: "$/mt", color: "#2563eb", decimals: 0 },
       { key: "Copper", label: "Copper", unit: "$/mt", color: "#ea580c", decimals: 0 },
       { key: "Tin", label: "Tin", unit: "$/mt", color: "#9333ea", decimals: 0 },
-      { key: "Tungsten", label: "Tungsten", unit: "$/mtu", color: "#475569", decimals: 2 },
-      { key: "Steel", label: "Steel", unit: "$/mt", color: "#334155", decimals: 2 },
       { key: "Rubber", label: "Rubber", unit: "$/kg", color: "#10b981", decimals: 2 },
       { key: "Silver", label: "Silver", unit: "$/toz", color: "#06b6d4", decimals: 2 }
     ];
 
     const INITIAL_DATASET = [
-      { Date: "2016-06", Gold: 1260, Aluminium: 1594, Copper: 4642, Tin: 17024, Tungsten: 168.00, Steel: 310.00, Rubber: 1.32, Silver: 17.20 },
-      { Date: "2016-12", Gold: 1159, Aluminium: 1734, Copper: 5666, Tin: 21245, Tungsten: 195.00, Steel: 440.00, Rubber: 1.92, Silver: 16.40 },
-      { Date: "2017-06", Gold: 1261, Aluminium: 1886, Copper: 5699, Tin: 19635, Tungsten: 218.00, Steel: 465.00, Rubber: 1.55, Silver: 16.95 },
-      { Date: "2017-12", Gold: 1265, Aluminium: 2080, Copper: 6808, Tin: 19545, Tungsten: 295.00, Steel: 550.00, Rubber: 1.48, Silver: 16.15 },
-      { Date: "2018-06", Gold: 1282, Aluminium: 2253, Copper: 6955, Tin: 20625, Tungsten: 335.00, Steel: 590.00, Rubber: 1.42, Silver: 16.50 },
-      { Date: "2018-12", Gold: 1247, Aluminium: 1930, Copper: 6150, Tin: 19325, Tungsten: 285.00, Steel: 530.00, Rubber: 1.28, Silver: 14.70 },
-      { Date: "2019-06", Gold: 1359, Aluminium: 1781, Copper: 5868, Tin: 19175, Tungsten: 265.00, Steel: 510.00, Rubber: 1.52, Silver: 15.00 },
-      { Date: "2019-12", Gold: 1481, Aluminium: 1770, Copper: 6062, Tin: 17150, Tungsten: 245.00, Steel: 460.00, Rubber: 1.45, Silver: 17.10 },
-      { Date: "2020-06", Gold: 1734, Aluminium: 1564, Copper: 5742, Tin: 16750, Tungsten: 220.00, Steel: 430.00, Rubber: 1.18, Silver: 17.75 },
-      { Date: "2020-12", Gold: 1858, Aluminium: 2018, Copper: 7755, Tin: 19950, Tungsten: 240.00, Steel: 610.00, Rubber: 1.65, Silver: 25.00 },
-      { Date: "2021-06", Gold: 1835, Aluminium: 2447, Copper: 9612, Tin: 31250, Tungsten: 285.00, Steel: 950.00, Rubber: 1.72, Silver: 27.00 },
-      { Date: "2021-12", Gold: 1790, Aluminium: 2695, Copper: 9550, Tin: 39350, Tungsten: 315.00, Steel: 740.00, Rubber: 1.75, Silver: 22.50 },
-      { Date: "2022-06", Gold: 1837, Aluminium: 2563, Copper: 9033, Tin: 33150, Tungsten: 338.00, Steel: 660.00, Rubber: 1.68, Silver: 21.50 },
-      { Date: "2022-12", Gold: 1798, Aluminium: 2400, Copper: 8367, Tin: 24200, Tungsten: 325.00, Steel: 585.00, Rubber: 1.40, Silver: 23.30 },
-      { Date: "2023-06", Gold: 1943, Aluminium: 2181, Copper: 8386, Tin: 26800, Tungsten: 330.00, Steel: 565.00, Rubber: 1.35, Silver: 23.40 },
-      { Date: "2023-12", Gold: 2026, Aluminium: 2182, Copper: 8394, Tin: 24650, Tungsten: 332.00, Steel: 570.00, Rubber: 1.48, Silver: 23.80 },
-      { Date: "2024-01", Gold: 2034, Aluminium: 2195, Copper: 8340, Tin: 25200, Tungsten: 335.00, Steel: 572.00, Rubber: 1.56, Silver: 22.90 },
-      { Date: "2024-02", Gold: 2024, Aluminium: 2180, Copper: 8310, Tin: 26150, Tungsten: 336.00, Steel: 568.00, Rubber: 1.60, Silver: 22.70 },
-      { Date: "2024-03", Gold: 2158, Aluminium: 2225, Copper: 8690, Tin: 27450, Tungsten: 338.00, Steel: 560.00, Rubber: 1.70, Silver: 24.50 },
-      { Date: "2024-04", Gold: 2331, Aluminium: 2498, Copper: 9480, Tin: 31100, Tungsten: 342.00, Steel: 558.00, Rubber: 1.72, Silver: 27.50 },
-      { Date: "2024-05", Gold: 2351, Aluminium: 2565, Copper: 10130, Tin: 32900, Tungsten: 348.00, Steel: 562.00, Rubber: 1.76, Silver: 29.40 },
-      { Date: "2024-06", Gold: 2326, Aluminium: 2495, Copper: 9640, Tin: 32350, Tungsten: 347.00, Steel: 555.00, Rubber: 1.82, Silver: 29.60 },
-      { Date: "2024-07", Gold: 2398, Aluminium: 2360, Copper: 9390, Tin: 32100, Tungsten: 345.00, Steel: 548.00, Rubber: 1.78, Silver: 29.70 },
-      { Date: "2024-08", Gold: 2470, Aluminium: 2380, Copper: 8980, Tin: 31400, Tungsten: 344.00, Steel: 535.00, Rubber: 1.85, Silver: 28.50 },
-      { Date: "2024-09", Gold: 2570, Aluminium: 2450, Copper: 9250, Tin: 31800, Tungsten: 346.00, Steel: 538.00, Rubber: 1.94, Silver: 30.10 },
-      { Date: "2024-10", Gold: 2690, Aluminium: 2595, Copper: 9530, Tin: 31200, Tungsten: 348.00, Steel: 545.00, Rubber: 2.02, Silver: 32.40 },
-      { Date: "2024-11", Gold: 2652, Aluminium: 2580, Copper: 9075, Tin: 29650, Tungsten: 349.00, Steel: 542.00, Rubber: 1.95, Silver: 31.10 },
-      { Date: "2024-12", Gold: 2650, Aluminium: 2530, Copper: 8950, Tin: 29100, Tungsten: 351.00, Steel: 540.00, Rubber: 1.98, Silver: 30.40 },
-      { Date: "2025-01", Gold: 2530, Aluminium: 2495, Copper: 8840, Tin: 29920, Tungsten: 353.00, Steel: 535.00, Rubber: 1.96, Silver: 29.75 },
-      { Date: "2025-02", Gold: 2548, Aluminium: 2510, Copper: 8880, Tin: 30100, Tungsten: 354.50, Steel: 536.50, Rubber: 1.97, Silver: 30.00 },
-      { Date: "2025-03", Gold: 2565, Aluminium: 2525, Copper: 8920, Tin: 30280, Tungsten: 356.00, Steel: 538.00, Rubber: 1.98, Silver: 30.25 },
-      { Date: "2025-04", Gold: 2582, Aluminium: 2540, Copper: 8960, Tin: 30450, Tungsten: 357.50, Steel: 539.50, Rubber: 1.99, Silver: 30.50 },
-      { Date: "2025-05", Gold: 2600, Aluminium: 2555, Copper: 9000, Tin: 30620, Tungsten: 359.00, Steel: 541.00, Rubber: 2.00, Silver: 30.75 },
-      { Date: "2025-06", Gold: 2618, Aluminium: 2570, Copper: 9040, Tin: 30800, Tungsten: 360.50, Steel: 542.50, Rubber: 2.01, Silver: 31.00 },
-      { Date: "2025-07", Gold: 2635, Aluminium: 2585, Copper: 9080, Tin: 30950, Tungsten: 362.00, Steel: 544.00, Rubber: 2.02, Silver: 31.25 },
-      { Date: "2025-08", Gold: 2652, Aluminium: 2600, Copper: 9120, Tin: 31100, Tungsten: 363.50, Steel: 545.50, Rubber: 2.03, Silver: 31.50 },
-      { Date: "2025-09", Gold: 2670, Aluminium: 2615, Copper: 9170, Tin: 31280, Tungsten: 365.00, Steel: 547.00, Rubber: 2.04, Silver: 31.80 },
-      { Date: "2025-10", Gold: 2690, Aluminium: 2630, Copper: 9215, Tin: 31450, Tungsten: 366.50, Steel: 548.50, Rubber: 2.05, Silver: 32.05 },
-      { Date: "2025-11", Gold: 2705, Aluminium: 2645, Copper: 9260, Tin: 31620, Tungsten: 368.00, Steel: 550.00, Rubber: 2.06, Silver: 32.30 },
-      { Date: "2025-12", Gold: 2725, Aluminium: 2660, Copper: 9310, Tin: 31800, Tungsten: 369.00, Steel: 552.00, Rubber: 2.07, Silver: 32.55 },
-      { Date: "2026-01", Gold: 2745, Aluminium: 2675, Copper: 9360, Tin: 31950, Tungsten: 370.00, Steel: 553.50, Rubber: 2.08, Silver: 32.80 },
-      { Date: "2026-02", Gold: 2762, Aluminium: 2690, Copper: 9410, Tin: 32100, Tungsten: 371.00, Steel: 555.00, Rubber: 2.09, Silver: 33.00 },
-      { Date: "2026-03", Gold: 2780, Aluminium: 2705, Copper: 9465, Tin: 32250, Tungsten: 372.00, Steel: 557.00, Rubber: 2.10, Silver: 33.25 },
-      { Date: "2026-04", Gold: 2798, Aluminium: 2720, Copper: 9510, Tin: 32420, Tungsten: 373.00, Steel: 558.50, Rubber: 2.11, Silver: 33.50 },
-      { Date: "2026-05", Gold: 2815, Aluminium: 2735, Copper: 9560, Tin: 32600, Tungsten: 374.00, Steel: 560.00, Rubber: 2.12, Silver: 33.75 },
-      { Date: "2026-06", Gold: 2830, Aluminium: 2750, Copper: 9600, Tin: 32750, Tungsten: 375.00, Steel: 562.00, Rubber: 2.13, Silver: 33.95 },
-      { Date: "2026-07", Gold: 2840, Aluminium: 2760, Copper: 9630, Tin: 32900, Tungsten: 376.00, Steel: 563.50, Rubber: 2.14, Silver: 34.10 },
-      { Date: "2026-08", Gold: 2850, Aluminium: 2770, Copper: 9660, Tin: 33050, Tungsten: 377.00, Steel: 565.00, Rubber: 2.15, Silver: 34.25 },
-      { Date: "2026-09", Gold: 2860, Aluminium: 2780, Copper: 9690, Tin: 33200, Tungsten: 378.00, Steel: 566.50, Rubber: 2.16, Silver: 34.40 },
-      { Date: "2026-10", Gold: 2870, Aluminium: 2790, Copper: 9720, Tin: 33350, Tungsten: 379.00, Steel: 568.00, Rubber: 2.17, Silver: 34.55 },
-      { Date: "2026-11", Gold: 2880, Aluminium: 2800, Copper: 9750, Tin: 33500, Tungsten: 380.00, Steel: 570.00, Rubber: 2.18, Silver: 34.70 },
-      { Date: "2026-12", Gold: 2890, Aluminium: 2810, Copper: 9780, Tin: 33650, Tungsten: 381.00, Steel: 572.00, Rubber: 2.19, Silver: 34.85 }
+      { Date: "2016-06", Gold: 1260, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Silver: 17.20 },
+      { Date: "2016-12", Gold: 1159, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Silver: 16.40 },
+      { Date: "2017-06", Gold: 1261, Aluminium: 1886, Copper: 5699, Tin: 19635, Rubber: 1.55, Silver: 16.95 },
+      { Date: "2017-12", Gold: 1265, Aluminium: 2080, Copper: 6808, Tin: 19545, Rubber: 1.48, Silver: 16.15 },
+      { Date: "2018-06", Gold: 1282, Aluminium: 2253, Copper: 6955, Tin: 20625, Rubber: 1.42, Silver: 16.50 },
+      { Date: "2018-12", Gold: 1247, Aluminium: 1930, Copper: 6150, Tin: 19325, Rubber: 1.28, Silver: 14.70 },
+      { Date: "2019-06", Gold: 1359, Aluminium: 1781, Copper: 5868, Tin: 19175, Rubber: 1.52, Silver: 15.00 },
+      { Date: "2019-12", Gold: 1481, Aluminium: 1770, Copper: 6062, Tin: 17150, Rubber: 1.45, Silver: 17.10 },
+      { Date: "2020-06", Gold: 1734, Aluminium: 1564, Copper: 5742, Tin: 16750, Rubber: 1.18, Silver: 17.75 },
+      { Date: "2020-12", Gold: 1858, Aluminium: 2018, Copper: 7755, Tin: 19950, Rubber: 1.65, Silver: 25.00 },
+      { Date: "2021-06", Gold: 1835, Aluminium: 2447, Copper: 9612, Tin: 31250, Rubber: 1.72, Silver: 27.00 },
+      { Date: "2021-12", Gold: 1790, Aluminium: 2695, Copper: 9550, Tin: 39350, Rubber: 1.75, Silver: 22.50 },
+      { Date: "2022-06", Gold: 1837, Aluminium: 2563, Copper: 9033, Tin: 33150, Rubber: 1.68, Silver: 21.50 },
+      { Date: "2022-12", Gold: 1798, Aluminium: 2400, Copper: 8367, Tin: 24200, Rubber: 1.40, Silver: 23.30 },
+      { Date: "2023-06", Gold: 1943, Aluminium: 2181, Copper: 8386, Tin: 26800, Rubber: 1.35, Silver: 23.40 },
+      { Date: "2023-12", Gold: 2026, Aluminium: 2182, Copper: 8394, Tin: 24650, Rubber: 1.48, Silver: 23.80 },
+      { Date: "2024-01", Gold: 2034, Aluminium: 2195, Copper: 8340, Tin: 25200, Rubber: 1.56, Silver: 22.90 },
+      { Date: "2024-02", Gold: 2024, Aluminium: 2180, Copper: 8310, Tin: 26150, Rubber: 1.60, Silver: 22.70 },
+      { Date: "2024-03", Gold: 2158, Aluminium: 2225, Copper: 8690, Tin: 27450, Rubber: 1.70, Silver: 24.50 },
+      { Date: "2024-04", Gold: 2331, Aluminium: 2498, Copper: 9480, Tin: 31100, Rubber: 1.72, Silver: 27.50 },
+      { Date: "2024-05", Gold: 2351, Aluminium: 2565, Copper: 10130, Tin: 32900, Rubber: 1.76, Silver: 29.40 },
+      { Date: "2024-06", Gold: 2326, Aluminium: 2495, Copper: 9640, Tin: 32350, Rubber: 1.82, Silver: 29.60 },
+      { Date: "2024-07", Gold: 2398, Aluminium: 2360, Copper: 9390, Tin: 32100, Rubber: 1.78, Silver: 29.70 },
+      { Date: "2024-08", Gold: 2470, Aluminium: 2380, Copper: 8980, Tin: 31400, Rubber: 1.85, Silver: 28.50 },
+      { Date: "2024-09", Gold: 2570, Aluminium: 2450, Copper: 9250, Tin: 31800, Rubber: 1.94, Silver: 30.10 },
+      { Date: "2024-10", Gold: 2690, Aluminium: 2595, Copper: 9530, Tin: 31200, Rubber: 2.02, Silver: 32.40 },
+      { Date: "2024-11", Gold: 2652, Aluminium: 2580, Copper: 9075, Tin: 29650, Rubber: 1.95, Silver: 31.10 },
+      { Date: "2024-12", Gold: 2650, Aluminium: 2530, Copper: 8950, Tin: 29100, Rubber: 1.98, Silver: 30.40 },
+      { Date: "2025-01", Gold: 2530, Aluminium: 2495, Copper: 8840, Tin: 29920, Rubber: 1.96, Silver: 29.75 },
+      { Date: "2025-02", Gold: 2548, Aluminium: 2510, Copper: 8880, Tin: 30100, Rubber: 1.97, Silver: 30.00 },
+      { Date: "2025-03", Gold: 2565, Aluminium: 2525, Copper: 8920, Tin: 30280, Rubber: 1.98, Silver: 30.25 },
+      { Date: "2025-04", Gold: 2582, Aluminium: 2540, Copper: 8960, Tin: 30450, Rubber: 1.99, Silver: 30.50 },
+      { Date: "2025-05", Gold: 2600, Aluminium: 2555, Copper: 9000, Tin: 30620, Rubber: 2.00, Silver: 30.75 },
+      { Date: "2025-06", Gold: 2618, Aluminium: 2570, Copper: 9040, Tin: 30800, Rubber: 2.01, Silver: 31.00 },
+      { Date: "2025-07", Gold: 2635, Aluminium: 2585, Copper: 9080, Tin: 30950, Rubber: 2.02, Silver: 31.25 },
+      { Date: "2025-08", Gold: 2652, Aluminium: 2600, Copper: 9120, Tin: 31100, Rubber: 2.03, Silver: 31.50 },
+      { Date: "2025-09", Gold: 2670, Aluminium: 2615, Copper: 9170, Tin: 31280, Rubber: 2.04, Silver: 31.80 },
+      { Date: "2025-10", Gold: 2690, Aluminium: 2630, Copper: 9215, Tin: 31450, Rubber: 2.05, Silver: 32.05 },
+      { Date: "2025-11", Gold: 2705, Aluminium: 2645, Copper: 9260, Tin: 31620, Rubber: 2.06, Silver: 32.30 },
+      { Date: "2025-12", Gold: 2725, Aluminium: 2660, Copper: 9310, Tin: 31800, Rubber: 2.07, Silver: 32.55 },
+      { Date: "2026-01", Gold: 2745, Aluminium: 2675, Copper: 9360, Tin: 31950, Rubber: 2.08, Silver: 32.80 },
+      { Date: "2026-02", Gold: 2762, Aluminium: 2690, Copper: 9410, Tin: 32100, Rubber: 2.09, Silver: 33.00 },
+      { Date: "2026-03", Gold: 2780, Aluminium: 2705, Copper: 9465, Tin: 32250, Rubber: 2.10, Silver: 33.25 },
+      { Date: "2026-04", Gold: 2798, Aluminium: 2720, Copper: 9510, Tin: 32420, Rubber: 2.11, Silver: 33.50 },
+      { Date: "2026-05", Gold: 2815, Aluminium: 2735, Copper: 9560, Tin: 32600, Rubber: 2.12, Silver: 33.75 },
+      { Date: "2026-06", Gold: 2830, Aluminium: 2750, Copper: 9600, Tin: 32750, Rubber: 2.13, Silver: 33.95 },
+      { Date: "2026-07", Gold: 2840, Aluminium: 2760, Copper: 9630, Tin: 32900, Rubber: 2.14, Silver: 34.10 },
+      { Date: "2026-08", Gold: 2850, Aluminium: 2770, Copper: 9660, Tin: 33050, Rubber: 2.15, Silver: 34.25 },
+      { Date: "2026-09", Gold: 2860, Aluminium: 2780, Copper: 9690, Tin: 33200, Rubber: 2.16, Silver: 34.40 },
+      { Date: "2026-10", Gold: 2870, Aluminium: 2790, Copper: 9720, Tin: 33350, Rubber: 2.17, Silver: 34.55 },
+      { Date: "2026-11", Gold: 2880, Aluminium: 2800, Copper: 9750, Tin: 33500, Rubber: 2.18, Silver: 34.70 },
+      { Date: "2026-12", Gold: 2890, Aluminium: 2810, Copper: 9780, Tin: 33650, Rubber: 2.19, Silver: 34.85 }
     ];
 
     let fullData = [...INITIAL_DATASET];
@@ -527,8 +522,6 @@
           <td>${formatCurrency(r.Aluminium, 0)}</td>
           <td>${formatCurrency(r.Copper, 0)}</td>
           <td>${formatCurrency(r.Tin, 0)}</td>
-          <td>${formatCurrency(r.Tungsten, 2)}</td>
-          <td>${formatCurrency(r.Steel, 2)}</td>
           <td>${formatCurrency(r.Rubber, 2)}</td>
           <td>${formatCurrency(r.Silver, 2)}</td>
         `;
@@ -572,24 +565,16 @@
         if (payload && payload.metadata) {
           const m = payload.metadata;
           if (m.source_portal) {
-            const el = document.getElementById("link-portal");
-            el.href = m.source_portal;
-            el.textContent = m.source_portal;
+            document.getElementById("link-portal").href = m.source_portal;
           }
           if (m.source_monthly_xlsx) {
-            const el = document.getElementById("link-monthly-xlsx");
-            el.href = m.source_monthly_xlsx;
-            el.textContent = m.source_monthly_xlsx;
+            document.getElementById("link-monthly-xlsx").href = m.source_monthly_xlsx;
           }
           if (m.source_annual_xlsx) {
-            const el = document.getElementById("link-annual-xlsx");
-            el.href = m.source_annual_xlsx;
-            el.textContent = m.source_annual_xlsx;
+            document.getElementById("link-annual-xlsx").href = m.source_annual_xlsx;
           }
           if (m.source_latest_pdf) {
-            const el = document.getElementById("link-pdf");
-            el.href = m.source_latest_pdf;
-            el.textContent = m.source_latest_pdf;
+            document.getElementById("link-pdf").href = m.source_latest_pdf;
           }
           if (m.fetched_at) {
             document.getElementById("last-updated-text").textContent = "Last Scraped: " + m.fetched_at;
