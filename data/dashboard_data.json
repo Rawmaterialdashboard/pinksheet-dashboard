@@ -1,0 +1,373 @@
+{
+  "metadata": {
+    "document_id": "18675f1d1639c7a34d463f59263ba0a2-0050012025",
+    "source_portal": "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/",
+    "source_monthly_xlsx": "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx",
+    "source_annual_xlsx": "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx",
+    "source_latest_pdf": "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Pink-Sheet-January-2026.pdf",
+    "fetched_at": "2026-11-04 07:47:52 UTC",
+    "row_count": 40
+  },
+  "records": [
+    {
+      "Gold": 1276.4,
+      "Aluminium": 1593.51,
+      "Copper": 4641.97,
+      "Tin": 16966.69,
+      "Rubber": 1.26,
+      "Silver": 17.29,
+      "Date": "2016-06"
+    },
+    {
+      "Gold": 1157.36,
+      "Aluminium": 1727.74,
+      "Copper": 5660.35,
+      "Tin": 21204.35,
+      "Rubber": 1.93,
+      "Silver": 16.43,
+      "Date": "2016-12"
+    },
+    {
+      "Gold": 1260.26,
+      "Aluminium": 1885.29,
+      "Copper": 5719.76,
+      "Tin": 19658.84,
+      "Rubber": 1.44,
+      "Silver": 16.93,
+      "Date": "2017-06"
+    },
+    {
+      "Gold": 1264.45,
+      "Aluminium": 2080.47,
+      "Copper": 6833.89,
+      "Tin": 19476.37,
+      "Rubber": 1.46,
+      "Silver": 16.16,
+      "Date": "2017-12"
+    },
+    {
+      "Gold": 1281.57,
+      "Aluminium": 2237.62,
+      "Copper": 6965.86,
+      "Tin": 20660.52,
+      "Rubber": 1.38,
+      "Silver": 16.54,
+      "Date": "2018-06"
+    },
+    {
+      "Gold": 1250.4,
+      "Aluminium": 1920.38,
+      "Copper": 6075.32,
+      "Tin": 19259.58,
+      "Rubber": 1.26,
+      "Silver": 14.77,
+      "Date": "2018-12"
+    },
+    {
+      "Gold": 1359.04,
+      "Aluminium": 1755.95,
+      "Copper": 5882.23,
+      "Tin": 19193.2,
+      "Rubber": 1.5,
+      "Silver": 15.04,
+      "Date": "2019-06"
+    },
+    {
+      "Gold": 1479.13,
+      "Aluminium": 1771.38,
+      "Copper": 6077.06,
+      "Tin": 17141.05,
+      "Rubber": 1.46,
+      "Silver": 17.14,
+      "Date": "2019-12"
+    },
+    {
+      "Gold": 1732.22,
+      "Aluminium": 1568.57,
+      "Copper": 5754.6,
+      "Tin": 16837.84,
+      "Rubber": 1.17,
+      "Silver": 17.71,
+      "Date": "2020-06"
+    },
+    {
+      "Gold": 1858.42,
+      "Aluminium": 2014.67,
+      "Copper": 7772.24,
+      "Tin": 19731.96,
+      "Rubber": 1.57,
+      "Silver": 24.97,
+      "Date": "2020-12"
+    },
+    {
+      "Gold": 1834.57,
+      "Aluminium": 2446.65,
+      "Copper": 9631.5,
+      "Tin": 32502.55,
+      "Rubber": 1.64,
+      "Silver": 27.0,
+      "Date": "2021-06"
+    },
+    {
+      "Gold": 1790.43,
+      "Aluminium": 2695.53,
+      "Copper": 9551.18,
+      "Tin": 39422.52,
+      "Rubber": 1.72,
+      "Silver": 22.53,
+      "Date": "2021-12"
+    },
+    {
+      "Gold": 1836.57,
+      "Aluminium": 2563.44,
+      "Copper": 9024.46,
+      "Tin": 31559.31,
+      "Rubber": 1.64,
+      "Silver": 21.56,
+      "Date": "2022-06"
+    },
+    {
+      "Gold": 1797.55,
+      "Aluminium": 2401.69,
+      "Copper": 8375.4,
+      "Tin": 24172.37,
+      "Rubber": 1.35,
+      "Silver": 23.33,
+      "Date": "2022-12"
+    },
+    {
+      "Gold": 1942.9,
+      "Aluminium": 2184.75,
+      "Copper": 8396.52,
+      "Tin": 27216.68,
+      "Rubber": 1.32,
+      "Silver": 23.42,
+      "Date": "2023-06"
+    },
+    {
+      "Gold": 2026.18,
+      "Aluminium": 2182.43,
+      "Copper": 8399.94,
+      "Tin": 24600.26,
+      "Rubber": 1.46,
+      "Silver": 23.88,
+      "Date": "2023-12"
+    },
+    {
+      "Gold": 2034.04,
+      "Aluminium": 2192.82,
+      "Copper": 8338.88,
+      "Tin": 25099.84,
+      "Rubber": 1.53,
+      "Silver": 22.92,
+      "Date": "2024-01"
+    },
+    {
+      "Gold": 2023.24,
+      "Aluminium": 2179.46,
+      "Copper": 8304.95,
+      "Tin": 26104.1,
+      "Rubber": 1.56,
+      "Silver": 22.66,
+      "Date": "2024-02"
+    },
+    {
+      "Gold": 2158.01,
+      "Aluminium": 2226.16,
+      "Copper": 8689.13,
+      "Tin": 27450.46,
+      "Rubber": 1.65,
+      "Silver": 24.52,
+      "Date": "2024-03"
+    },
+    {
+      "Gold": 2331.45,
+      "Aluminium": 2506.1,
+      "Copper": 9464.43,
+      "Tin": 31774.5,
+      "Rubber": 1.63,
+      "Silver": 27.49,
+      "Date": "2024-04"
+    },
+    {
+      "Gold": 2351.13,
+      "Aluminium": 2564.54,
+      "Copper": 10139.33,
+      "Tin": 32977.51,
+      "Rubber": 1.69,
+      "Silver": 29.36,
+      "Date": "2024-05"
+    },
+    {
+      "Gold": 2326.44,
+      "Aluminium": 2497.61,
+      "Copper": 9648.17,
+      "Tin": 32032.7,
+      "Rubber": 1.75,
+      "Silver": 29.58,
+      "Date": "2024-06"
+    },
+    {
+      "Gold": 2398.2,
+      "Aluminium": 2349.13,
+      "Copper": 9385.31,
+      "Tin": 31860.47,
+      "Rubber": 1.65,
+      "Silver": 29.77,
+      "Date": "2024-07"
+    },
+    {
+      "Gold": 2470.15,
+      "Aluminium": 2343.67,
+      "Copper": 8971.96,
+      "Tin": 31491.65,
+      "Rubber": 1.74,
+      "Silver": 28.53,
+      "Date": "2024-08"
+    },
+    {
+      "Gold": 2570.55,
+      "Aluminium": 2449.92,
+      "Copper": 9237.48,
+      "Tin": 31471.69,
+      "Rubber": 1.91,
+      "Silver": 30.13,
+      "Date": "2024-09"
+    },
+    {
+      "Gold": 2690.08,
+      "Aluminium": 2595.58,
+      "Copper": 9533.99,
+      "Tin": 32012.43,
+      "Rubber": 2.01,
+      "Silver": 32.42,
+      "Date": "2024-10"
+    },
+    {
+      "Gold": 2651.13,
+      "Aluminium": 2582.19,
+      "Copper": 9075.73,
+      "Tin": 29654.89,
+      "Rubber": 1.93,
+      "Silver": 31.09,
+      "Date": "2024-11"
+    },
+    {
+      "Gold": 2648.01,
+      "Aluminium": 2541.02,
+      "Copper": 8916.32,
+      "Tin": 28864.99,
+      "Rubber": 1.99,
+      "Silver": 30.76,
+      "Date": "2024-12"
+    },
+    {
+      "Gold": 2709.69,
+      "Aluminium": 2573.4,
+      "Copper": 8991.41,
+      "Tin": 29612.36,
+      "Rubber": 1.93,
+      "Silver": 30.41,
+      "Date": "2025-01"
+    },
+    {
+      "Gold": 2894.73,
+      "Aluminium": 2657.6,
+      "Copper": 9330.6,
+      "Tin": 31832.96,
+      "Rubber": 2.01,
+      "Silver": 32.15,
+      "Date": "2025-02"
+    },
+    {
+      "Gold": 2983.25,
+      "Aluminium": 2658.29,
+      "Copper": 9739.68,
+      "Tin": 34047.87,
+      "Rubber": 1.98,
+      "Silver": 33.19,
+      "Date": "2025-03"
+    },
+    {
+      "Gold": 3217.64,
+      "Aluminium": 2371.6,
+      "Copper": 9176.8,
+      "Tin": 32565.05,
+      "Rubber": 1.71,
+      "Silver": 32.22,
+      "Date": "2025-04"
+    },
+    {
+      "Gold": 3309.49,
+      "Aluminium": 2448.79,
+      "Copper": 9532.98,
+      "Tin": 31981.17,
+      "Rubber": 1.7,
+      "Silver": 32.76,
+      "Date": "2025-05"
+    },
+    {
+      "Gold": 3352.66,
+      "Aluminium": 2525.96,
+      "Copper": 9835.07,
+      "Tin": 32544.03,
+      "Rubber": 1.61,
+      "Silver": 36.01,
+      "Date": "2025-06"
+    },
+    {
+      "Gold": 3340.15,
+      "Aluminium": 2606.37,
+      "Copper": 9770.58,
+      "Tin": 33610.26,
+      "Rubber": 1.68,
+      "Silver": 37.7,
+      "Date": "2025-07"
+    },
+    {
+      "Gold": 3368.03,
+      "Aluminium": 2597.34,
+      "Copper": 9669.56,
+      "Tin": 33833.76,
+      "Rubber": 1.71,
+      "Silver": 38.18,
+      "Date": "2025-08"
+    },
+    {
+      "Gold": 3667.68,
+      "Aluminium": 2653.32,
+      "Copper": 9983.79,
+      "Tin": 34483.91,
+      "Rubber": 1.74,
+      "Silver": 42.82,
+      "Date": "2025-09"
+    },
+    {
+      "Gold": 4058.33,
+      "Aluminium": 2793.09,
+      "Copper": 10739.91,
+      "Tin": 36011.92,
+      "Rubber": 1.71,
+      "Silver": 49.44,
+      "Date": "2025-10"
+    },
+    {
+      "Gold": 4087.19,
+      "Aluminium": 2819.06,
+      "Copper": 10812.03,
+      "Tin": 36963.22,
+      "Rubber": 1.71,
+      "Silver": 50.43,
+      "Date": "2025-11"
+    },
+    {
+      "Gold": 4309.23,
+      "Aluminium": 2875.53,
+      "Copper": 11785.25,
+      "Tin": 41219.52,
+      "Rubber": 1.74,
+      "Silver": 62.34,
+      "Date": "2025-12"
+    }
+  ]
+}
