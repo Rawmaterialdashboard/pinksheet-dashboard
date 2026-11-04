@@ -9,7 +9,7 @@ import pandas as pd
 DOC_ID = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
 BASE_URL = f"https://thedocs.worldbank.org/en/doc/{DOC_ID}"
 
-PORTAL_URL = f"{BASE_URL}/world-bank-commodities-price-data-the-pink-sheet"
+PORTAL_URL = f"{BASE_URL}/"
 MONTHLY_XLSX_URL = f"{BASE_URL}/related/CMO-Historical-Data-Monthly.xlsx"
 ANNUAL_XLSX_URL = f"{BASE_URL}/related/CMO-Historical-Data-Annual.xlsx"
 LATEST_PDF_URL = f"{BASE_URL}/related/CMO-Pink-Sheet-January-2026.pdf"
@@ -35,9 +35,10 @@ def scrape_pink_sheet_monthly():
     resp = requests.get(MONTHLY_XLSX_URL, headers=headers, timeout=60)
     resp.raise_for_status()
 
-    # 读取 Monthly Prices 工作表（第 5 行为列名，即 index=4）
+    # 读取 Monthly Prices 工作表（第 5 行为列名，即 skiprows=4）
     df = pd.read_excel(io.BytesIO(resp.content), sheet_name="Monthly Prices", skiprows=4)
-    df.rename(columns={df.columns[0]: "RawDate"}, inplace=True)
+    first_col = df.columns[0]
+    df.rename(columns={first_col: "RawDate"}, inplace=True)
 
     # 过滤掉单位行（第 6 行）和空行，解析类似 2016M06 的日期格式
     df["DateObj"] = pd.to_datetime(df["RawDate"].astype(str), format="%YM%m", errors="coerce")
@@ -54,8 +55,8 @@ def scrape_pink_sheet_monthly():
     out_df["Year"] = out_df["DateObj"].dt.year
     out_df["Month"] = out_df["DateObj"].dt.month
 
-    # 时间过滤与采样规则：2016-2023 半年度(6月,12月)，2024+ 月度
-    df_semi = out_df[(out_df["Year"] >= 2016) & (out_df["Year"] <= 2023) & (out_df["Month"].isin())]
+    # 时间过滤与采样规则：2016-2023 半年度(6月, 12月)，2024+ 月度
+    df_semi = out_df[(out_df["Year"] >= 2016) & (out_df["Year"] <= 2023) & (out_df["Month"].isin([6, 12]))]
     df_monthly = out_df[out_df["Year"] >= 2024]
 
     merged = pd.concat([df_semi, df_monthly], ignore_index=True).sort_values("DateObj")
@@ -67,6 +68,8 @@ def merge_with_supplement(df_wb):
     if os.path.exists(MANUAL_CSV_PATH):
         sup = pd.read_csv(MANUAL_CSV_PATH)
         sup["Date"] = sup["Date"].astype(str).str.strip()
+        if "Steel_Custom" in sup.columns and "Steel" not in sup.columns:
+            sup.rename(columns={"Steel_Custom": "Steel"}, inplace=True)
         df_wb = pd.merge(df_wb, sup, on="Date", how="left")
     else:
         df_wb["Tungsten"] = None
