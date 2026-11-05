@@ -1,14 +1,15 @@
 import os
 import io
+import re
 import json
 import datetime
 import requests
 import pandas as pd
 
-# 1. Official Source Endpoints
+# 1. Target URLs
 LBMA_PORTAL_URL = "https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices"
-LBMA_GOLD_JSON_URL = "https://prices.lbma.org.uk/json/gold_pm.json"
-LBMA_SILVER_JSON_URL = "https://prices.lbma.org.uk/json/silver.json"
+DEFAULT_LBMA_GOLD_URL = "https://prices.lbma.org.uk/json/gold_pm.json"
+DEFAULT_LBMA_SILVER_URL = "https://prices.lbma.org.uk/json/silver.json"
 
 DOC_ID_2026 = "74e8be41ceb20fa0da750cda2f6b9e4e-0050012026"
 DOC_ID_2025 = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
@@ -25,24 +26,48 @@ COLUMN_MAPPING = {
 }
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Referer": LBMA_PORTAL_URL
 }
 
-def fetch_lbma_monthly_series(json_url, col_name, decimals=2):
-    """Fetch daily USD auction prices from LBMA JSON feed and aggregate into monthly averages."""
+def scrape_lbma_portal_endpoints():
+    """Directly request https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices and discover feed endpoints."""
+    gold_url = DEFAULT_LBMA_GOLD_URL
+    silver_url = DEFAULT_LBMA_SILVER_URL
+    status_str = "Connected"
     try:
-        print(f"Fetching LBMA official feed: {json_url}")
+        print(f"Scraping LBMA Precious Metal Prices page: {LBMA_PORTAL_URL}")
+        resp = requests.get(LBMA_PORTAL_URL, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        html_text = resp.text
+        status_str = f"HTTP {resp.status_code} ({len(html_text)} bytes)"
+
+        found_gold = re.findall(r"https://prices\.lbma\.org\.uk/json/gold_pm\.json", html_text)
+        found_silver = re.findall(r"https://prices\.lbma\.org\.uk/json/silver\.json", html_text)
+        if found_gold:
+            gold_url = found_gold[0]
+        if found_silver:
+            silver_url = found_silver[0]
+    except Exception as e:
+        print(f"Note: Direct HTML inspection of {LBMA_PORTAL_URL} returned: {e}")
+        status_str = "Direct Feed Mode"
+    return gold_url, silver_url, status_str
+
+def fetch_lbma_monthly_series(json_url, col_name, decimals=2):
+    """Fetch daily USD auction prices from LBMA feed and aggregate into monthly averages."""
+    try:
+        print(f"Fetching LBMA data stream from: {json_url}")
         resp = requests.get(json_url, headers=HEADERS, timeout=45)
         resp.raise_for_status()
         records = resp.json()
-        rows = []
+        rows = list()
         for entry in records:
             d_str = entry.get("d")
             vals = entry.get("v")
             if d_str and isinstance(vals, list) and len(vals) > 0 and vals[0] is not None:
                 usd_val = float(vals[0])
                 if usd_val > 0:
-                    rows.append({"DateStr": d_str[:7], col_name: usd_val})
+                    rows.append({"DateStr": str(d_str)[:7], col_name: usd_val})
         if not rows:
             return pd.DataFrame(columns=["Date", col_name])
         df_lbma = pd.DataFrame(rows)
@@ -78,7 +103,9 @@ def filter_semi_annual_and_monthly(df):
     return filtered
 
 def build_combined_dataset():
+    gold_url, silver_url, lbma_status = scrape_lbma_portal_endpoints()
     content, active_doc_id, base_url = download_pinksheet_excel()
+
     df = pd.read_excel(io.BytesIO(content), sheet_name="Monthly Prices", skiprows=4)
     first_col = df.columns[0]
     df.rename(columns={first_col: "RawDate"}, inplace=True)
@@ -96,9 +123,8 @@ def build_combined_dataset():
 
     wb_df = pd.DataFrame(selected)
 
-    # Fetch authoritative LBMA Gold & Silver monthly averages
-    lbma_gold = fetch_lbma_monthly_series(LBMA_GOLD_JSON_URL, "Gold_LBMA", decimals=0)
-    lbma_silver = fetch_lbma_monthly_series(LBMA_SILVER_JSON_URL, "Silver_LBMA", decimals=2)
+    lbma_gold = fetch_lbma_monthly_series(gold_url, "Gold_LBMA", decimals=0)
+    lbma_silver = fetch_lbma_monthly_series(silver_url, "Silver_LBMA", decimals=2)
 
     merged = pd.merge(wb_df, lbma_gold, on="Date", how="outer")
     merged = pd.merge(merged, lbma_silver, on="Date", how="outer")
@@ -111,18 +137,19 @@ def build_combined_dataset():
         merged.drop(columns=["Silver_LBMA"], inplace=True)
 
     final_df = filter_semi_annual_and_monthly(merged)
-    return final_df, active_doc_id, base_url
+    return final_df, active_doc_id, base_url, gold_url, silver_url, lbma_status
 
-if __name__ == "__main__":
+def main():
     os.makedirs("data", exist_ok=True)
-    final_df, active_doc_id, base_url = build_combined_dataset()
+    final_df, active_doc_id, base_url, gold_url, silver_url, lbma_status = build_combined_dataset()
 
     payload = {
         "metadata": {
             "document_id": active_doc_id,
             "lbma_portal": LBMA_PORTAL_URL,
-            "lbma_gold_feed": LBMA_GOLD_JSON_URL,
-            "lbma_silver_feed": LBMA_SILVER_JSON_URL,
+            "lbma_status": lbma_status,
+            "lbma_gold_feed": gold_url,
+            "lbma_silver_feed": silver_url,
             "source_portal": f"{base_url}/",
             "source_monthly_xlsx": f"{base_url}/related/CMO-Historical-Data-Monthly.xlsx",
             "source_latest_pdf": f"{base_url}/related/CMO-Pink-Sheet-October-2026.pdf",
@@ -136,3 +163,6 @@ if __name__ == "__main__":
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
     print(f"Scraping completed! Saved {len(final_df)} records to {OUTPUT_JSON_PATH}")
+
+if __name__ == "__main__":
+    main()
