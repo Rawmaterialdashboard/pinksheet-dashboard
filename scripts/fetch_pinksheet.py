@@ -5,7 +5,7 @@ import datetime
 import requests
 import pandas as pd
 
-# 1. Target 2026 World Bank Pink Sheet Container (with 2025 fallback)
+# 1. Target 2026 World Bank Pink Sheet Official Container (with 2025 fallback)
 DOC_ID_2026 = "74e8be41ceb20fa0da750cda2f6b9e4e-0050012026"
 DOC_ID_2025 = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
 
