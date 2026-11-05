@@ -5,14 +5,9 @@ import datetime
 import requests
 import pandas as pd
 
-# 1. Target Portal & Underlying Related File Direct URLs
-DOC_ID = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
-BASE_URL = f"https://thedocs.worldbank.org/en/doc/{DOC_ID}"
-
-PORTAL_URL = f"{BASE_URL}/"
-MONTHLY_XLSX_URL = f"{BASE_URL}/related/CMO-Historical-Data-Monthly.xlsx"
-ANNUAL_XLSX_URL = f"{BASE_URL}/related/CMO-Historical-Data-Annual.xlsx"
-LATEST_PDF_URL = f"{BASE_URL}/related/CMO-Pink-Sheet-January-2026.pdf"
+# 1. Target 2026 World Bank Pink Sheet Container (with 2025 fallback)
+DOC_ID_2026 = "74e8be41ceb20fa0da750cda2f6b9e4e-0050012026"
+DOC_ID_2025 = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
 
 OUTPUT_JSON_PATH = "data/dashboard_data.json"
 
@@ -26,16 +21,27 @@ COLUMN_MAPPING = {
     "Silver": "Silver"
 }
 
-def scrape_pink_sheet_monthly():
-    print(f"Downloading underlying monthly Excel file: {MONTHLY_XLSX_URL}")
+def download_pinksheet_excel():
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
-    resp = requests.get(MONTHLY_XLSX_URL, headers=headers, timeout=60)
-    resp.raise_for_status()
+    for doc_id in [DOC_ID_2026, DOC_ID_2025]:
+        base_url = f"https://thedocs.worldbank.org/en/doc/{doc_id}"
+        xlsx_url = f"{base_url}/related/CMO-Historical-Data-Monthly.xlsx"
+        try:
+            print(f"Trying to download monthly Excel file from: {xlsx_url}")
+            resp = requests.get(xlsx_url, headers=headers, timeout=60)
+            resp.raise_for_status()
+            return resp.content, doc_id, base_url
+        except Exception as e:
+            print(f"Warning: Failed for {doc_id}: {e}")
+    raise RuntimeError("Could not download World Bank Pink Sheet Excel file from any container.")
+
+def scrape_pink_sheet_monthly():
+    content, active_doc_id, base_url = download_pinksheet_excel()
 
     # Read "Monthly Prices" worksheet (Row 5 contains headers, so skiprows=4)
-    df = pd.read_excel(io.BytesIO(resp.content), sheet_name="Monthly Prices", skiprows=4)
+    df = pd.read_excel(io.BytesIO(content), sheet_name="Monthly Prices", skiprows=4)
     first_col = df.columns[0]
     df.rename(columns={first_col: "RawDate"}, inplace=True)
 
@@ -55,25 +61,25 @@ def scrape_pink_sheet_monthly():
     out_df["Month"] = out_df["DateObj"].dt.month
 
     # Time filtering & sampling rules: 2016-2023 Semi-Annual (June & Dec), 2024+ Monthly
-    df_semi = out_df[(out_df["Year"] >= 2016) & (out_df["Year"] <= 2023) & (out_df["Month"].isin([6, 12]))]
+    df_semi = out_df[(out_df["Year"] >= 2016) & (out_df["Year"] <= 2023) & (out_df["Month"].isin())]
     df_monthly = out_df[out_df["Year"] >= 2024]
 
     merged = pd.concat([df_semi, df_monthly], ignore_index=True).sort_values("DateObj")
     merged["Date"] = merged["DateObj"].dt.strftime("%Y-%m")
     merged.drop(columns=["DateObj", "Year", "Month"], inplace=True)
-    return merged
+    return merged, active_doc_id, base_url
 
 if __name__ == "__main__":
     os.makedirs("data", exist_ok=True)
-    final_df = scrape_pink_sheet_monthly()
+    final_df, active_doc_id, base_url = scrape_pink_sheet_monthly()
 
     payload = {
         "metadata": {
-            "document_id": DOC_ID,
-            "source_portal": PORTAL_URL,
-            "source_monthly_xlsx": MONTHLY_XLSX_URL,
-            "source_annual_xlsx": ANNUAL_XLSX_URL,
-            "source_latest_pdf": LATEST_PDF_URL,
+            "document_id": active_doc_id,
+            "source_portal": f"{base_url}/",
+            "source_monthly_xlsx": f"{base_url}/related/CMO-Historical-Data-Monthly.xlsx",
+            "source_annual_xlsx": f"{base_url}/related/CMO-Historical-Data-Annual.xlsx",
+            "source_latest_pdf": f"{base_url}/related/CMO-Pink-Sheet-October-2026.pdf",
             "fetched_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
             "row_count": len(final_df)
         },
