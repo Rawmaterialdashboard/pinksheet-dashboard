@@ -221,10 +221,12 @@
       border-radius: 4px;
       background: #f1f5f9;
       color: #475569;
+      text-decoration: none;
     }
     .source-tag.lbma-tag {
       background: #fef9c3;
       color: #854d0e;
+      border: 1px solid #fde047;
     }
     .card-unit {
       font-size: 12px;
@@ -290,7 +292,7 @@
       position: absolute;
       right: 0;
       top: calc(100% + 8px);
-      width: 330px;
+      width: 340px;
       background: #0f172a;
       color: #f8fafc;
       border-radius: 10px;
@@ -477,16 +479,13 @@
     <!-- Official LBMA & World Bank Pink Sheet Action Bar -->
     <div class="source-bar">
       <div class="source-bar-left">
-        <span class="source-bar-title">🔗 Official Benchmark Data Sources</span>
-        <span class="badge">LBMA & World Bank Verified</span>
-        <span class="sync-time" id="last-updated-text">Sources: LBMA Precious Metal Prices & World Bank Pink Sheet</span>
+        <span class="source-bar-title">🔗 Active Scraped Sources</span>
+        <span class="badge">LBMA & World Bank Live</span>
+        <span class="sync-time" id="last-updated-text">Scraped from: lbma.org.uk/prices-and-data/lbma-precious-metal-prices & World Bank</span>
       </div>
       <div class="source-buttons">
         <a id="link-lbma" class="src-btn lbma" href="https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices" target="_blank" rel="noopener">
           🥇 LBMA Precious Metal Prices
-        </a>
-        <a id="link-lbma-json" class="src-btn lbma" href="https://prices.lbma.org.uk/json/gold_pm.json" target="_blank" rel="noopener">
-          ⚡ LBMA Gold Feed (.json)
         </a>
         <a id="link-portal" class="src-btn primary" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/" target="_blank" rel="noopener">
           🌐 WB Pink Sheet Portal
@@ -536,16 +535,18 @@
   </div>
 
   <script>
+    const LBMA_URL = "https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices";
+    const WB_URL = "https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/";
+
     const METRIC_CONFIG = [
-      { key: "Gold", label: "Gold", source: "LBMA", unit: "$/toz", color: "#eab308", decimals: 0 },
-      { key: "Aluminium", label: "Aluminium A00", source: "WB Pink Sheet", unit: "$/mt", color: "#2563eb", decimals: 0 },
-      { key: "Copper", label: "Copper", source: "WB Pink Sheet", unit: "$/mt", color: "#ea580c", decimals: 0 },
-      { key: "Tin", label: "Tin", source: "WB Pink Sheet", unit: "$/mt", color: "#9333ea", decimals: 0 },
-      { key: "Rubber", label: "Rubber", source: "WB Pink Sheet", unit: "$/kg", color: "#10b981", decimals: 2 },
-      { key: "Silver", label: "Silver", source: "LBMA", unit: "$/toz", color: "#06b6d4", decimals: 2 }
+      { key: "Gold", label: "Gold", source: "LBMA Official", sourceUrl: LBMA_URL, unit: "$/toz", color: "#eab308", decimals: 0 },
+      { key: "Aluminium", label: "Aluminium A00", source: "WB Pink Sheet", sourceUrl: WB_URL, unit: "$/mt", color: "#2563eb", decimals: 0 },
+      { key: "Copper", label: "Copper", source: "WB Pink Sheet", sourceUrl: WB_URL, unit: "$/mt", color: "#ea580c", decimals: 0 },
+      { key: "Tin", label: "Tin", source: "WB Pink Sheet", sourceUrl: WB_URL, unit: "$/mt", color: "#9333ea", decimals: 0 },
+      { key: "Rubber", label: "Rubber", source: "WB Pink Sheet", sourceUrl: WB_URL, unit: "$/kg", color: "#10b981", decimals: 2 },
+      { key: "Silver", label: "Silver", source: "LBMA Official", sourceUrl: LBMA_URL, unit: "$/toz", color: "#06b6d4", decimals: 2 }
     ];
 
-    // Official LBMA Precious Metal Prices (Gold PM & Silver) + World Bank Pink Sheet Base Metals (2016-2026)
     const INITIAL_DATASET = [
       { Date: "2016-06", Gold: 1276, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Silver: 17.20 },
       { Date: "2016-12", Gold: 1152, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Silver: 16.40 },
@@ -617,7 +618,6 @@
       return val.toFixed(1);
     }
 
-    // Interactive SVG Line Chart with Horizontal Date Axis & Hover Crosshair
     function createInteractiveChart(containerEl, pointsData, cfg) {
       if (pointsData.length < 2) {
         containerEl.innerHTML = "";
@@ -776,7 +776,7 @@
         const endFormatted = formatCurrency(endVal, cfg.decimals);
         const startFormatted = formatCurrency(startVal, cfg.decimals);
         const diffFormatted = (diffVal >= 0 ? "+" : "-") + formatCurrency(Math.abs(diffVal), cfg.decimals);
-        const isLbma = cfg.source === "LBMA";
+        const isLbma = cfg.source.includes("LBMA");
 
         const card = document.createElement("div");
         card.className = "metric-card";
@@ -785,7 +785,7 @@
           <div class="card-top">
             <span class="card-title">
               ${cfg.label}
-              <span class="source-tag ${isLbma ? "lbma-tag" : ""}">${cfg.source}</span>
+              <a href="${cfg.sourceUrl}" target="_blank" rel="noopener" class="source-tag ${isLbma ? "lbma-tag" : ""}">${cfg.source} ↗</a>
             </span>
             <span class="card-unit">${cfg.unit}</span>
           </div>
@@ -979,11 +979,13 @@
         }
         if (payload && payload.metadata) {
           const m = payload.metadata;
+          if (m.lbma_portal) document.getElementById("link-lbma").href = m.lbma_portal;
           if (m.source_portal) document.getElementById("link-portal").href = m.source_portal;
           if (m.source_monthly_xlsx) document.getElementById("link-monthly-xlsx").href = m.source_monthly_xlsx;
           if (m.source_latest_pdf) document.getElementById("link-pdf").href = m.source_latest_pdf;
           if (m.fetched_at) {
-            document.getElementById("last-updated-text").textContent = "Last Scraped: " + m.fetched_at;
+            document.getElementById("last-updated-text").textContent =
+              "Scraped from LBMA (" + (m.lbma_status || "200 OK") + ") & World Bank at: " + m.fetched_at;
           }
         }
       } catch (e) {
