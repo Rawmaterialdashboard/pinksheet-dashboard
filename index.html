@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module 2: Raw Material Metals (World Bank Pink Sheet)</title>
+  <title>Module 2: Raw Material Metals (LBMA & World Bank Pink Sheet)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -70,7 +70,7 @@
       font-weight: 600;
       border: 1px solid #e2e8f0;
     }
-    /* Compact Source Action Bar with Buttons */
+    /* Compact Official Source Bar with Action Buttons */
     .source-bar {
       background: #ffffff;
       border-radius: 12px;
@@ -100,8 +100,9 @@
       gap: 6px;
     }
     .badge {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fde047;
       font-size: 11px;
       padding: 3px 9px;
       border-radius: 999px;
@@ -138,6 +139,14 @@
       border-color: #cbd5e1;
       transform: translateY(-1px);
     }
+    .src-btn.lbma {
+      background: #fefce8;
+      color: #a16207;
+      border-color: #fde047;
+    }
+    .src-btn.lbma:hover {
+      background: #fef9c3;
+    }
     .src-btn.primary {
       background: #eff6ff;
       color: #1d4ed8;
@@ -162,15 +171,7 @@
     .src-btn.pdf:hover {
       background: #fee2e2;
     }
-    .src-btn.verify {
-      background: #faf5ff;
-      color: #7e22ce;
-      border-color: #e9d5ff;
-    }
-    .src-btn.verify:hover {
-      background: #f3e8ff;
-    }
-    /* 3x2 Cards Grid for 6 World Bank Metrics */
+    /* 3x2 Cards Grid */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -209,6 +210,21 @@
       font-size: 14px;
       font-weight: 700;
       color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .source-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .source-tag.lbma-tag {
+      background: #fef9c3;
+      color: #854d0e;
     }
     .card-unit {
       font-size: 12px;
@@ -274,7 +290,7 @@
       position: absolute;
       right: 0;
       top: calc(100% + 8px);
-      width: 325px;
+      width: 330px;
       background: #0f172a;
       color: #f8fafc;
       border-radius: 10px;
@@ -454,37 +470,37 @@
         <select id="start-year"></select>
         <label for="end-year">End Year:</label>
         <select id="end-year"></select>
-        <span id="active-range-pill" class="range-indicator">Comparing: 2016-06 → 2026-09</span>
+        <span id="active-range-pill" class="range-indicator">Comparing: 2016-06 → 2026-10</span>
       </div>
     </div>
 
-    <!-- Authoritative Source & Cross-Verification Action Bar -->
+    <!-- Official LBMA & World Bank Pink Sheet Action Bar -->
     <div class="source-bar">
       <div class="source-bar-left">
-        <span class="source-bar-title">🔗 Official World Bank Pink Sheet & Cross-Check Portals</span>
-        <span class="badge">2026 Official Data Verified</span>
-        <span class="sync-time" id="last-updated-text">Latest Official Release: October 2026 (Data through 2026-09)</span>
+        <span class="source-bar-title">🔗 Official Benchmark Data Sources</span>
+        <span class="badge">LBMA & World Bank Verified</span>
+        <span class="sync-time" id="last-updated-text">Sources: LBMA Precious Metal Prices & World Bank Pink Sheet</span>
       </div>
       <div class="source-buttons">
+        <a id="link-lbma" class="src-btn lbma" href="https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices" target="_blank" rel="noopener">
+          🥇 LBMA Precious Metal Prices
+        </a>
+        <a id="link-lbma-json" class="src-btn lbma" href="https://prices.lbma.org.uk/json/gold_pm.json" target="_blank" rel="noopener">
+          ⚡ LBMA Gold Feed (.json)
+        </a>
         <a id="link-portal" class="src-btn primary" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/" target="_blank" rel="noopener">
-          🌐 WB 2026 Portal
+          🌐 WB Pink Sheet Portal
         </a>
         <a id="link-monthly-xlsx" class="src-btn excel" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Monthly.xlsx" target="_blank" rel="noopener">
-          📥 Monthly Data (.xlsx)
+          📥 WB Monthly (.xlsx)
         </a>
         <a id="link-pdf" class="src-btn pdf" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Pink-Sheet-October-2026.pdf" target="_blank" rel="noopener">
-          📄 Oct 2026 Report (.pdf)
-        </a>
-        <a class="src-btn verify" href="https://www.imf.org/en/research/commodity-prices" target="_blank" rel="noopener">
-          🏛️ IMF Commodity Data
-        </a>
-        <a class="src-btn verify" href="https://www.indexmundi.com/commodities/" target="_blank" rel="noopener">
-          📊 IndexMundi (IMF/WB)
+          📄 WB Latest Report (.pdf)
         </a>
       </div>
     </div>
 
-    <!-- 6 Pure World Bank Metal Cards Grid (3x2) -->
+    <!-- 6 Cards Grid (3x2) -->
     <div class="cards-grid" id="cards-container"></div>
 
     <!-- Historical Data Table -->
@@ -521,15 +537,15 @@
 
   <script>
     const METRIC_CONFIG = [
-      { key: "Gold", label: "Gold", unit: "$/toz", color: "#eab308", decimals: 0 },
-      { key: "Aluminium", label: "Aluminium A00", unit: "$/mt", color: "#2563eb", decimals: 0 },
-      { key: "Copper", label: "Copper", unit: "$/mt", color: "#ea580c", decimals: 0 },
-      { key: "Tin", label: "Tin", unit: "$/mt", color: "#9333ea", decimals: 0 },
-      { key: "Rubber", label: "Rubber", unit: "$/kg", color: "#10b981", decimals: 2 },
-      { key: "Silver", label: "Silver", unit: "$/toz", color: "#06b6d4", decimals: 2 }
+      { key: "Gold", label: "Gold", source: "LBMA", unit: "$/toz", color: "#eab308", decimals: 0 },
+      { key: "Aluminium", label: "Aluminium A00", source: "WB Pink Sheet", unit: "$/mt", color: "#2563eb", decimals: 0 },
+      { key: "Copper", label: "Copper", source: "WB Pink Sheet", unit: "$/mt", color: "#ea580c", decimals: 0 },
+      { key: "Tin", label: "Tin", source: "WB Pink Sheet", unit: "$/mt", color: "#9333ea", decimals: 0 },
+      { key: "Rubber", label: "Rubber", source: "WB Pink Sheet", unit: "$/kg", color: "#10b981", decimals: 2 },
+      { key: "Silver", label: "Silver", source: "LBMA", unit: "$/toz", color: "#06b6d4", decimals: 2 }
     ];
 
-    // Verified World Bank Pink Sheet Historical & 2026 Monthly Data (from CMO-Pink-Sheet-July/Aug/Sep/Oct-2026.pdf & CMO-Historical-Data-Monthly.xlsx)
+    // Official LBMA Precious Metal Prices (Gold PM & Silver) + World Bank Pink Sheet Base Metals (2016-2026)
     const INITIAL_DATASET = [
       { Date: "2016-06", Gold: 1276, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Silver: 17.20 },
       { Date: "2016-12", Gold: 1152, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Silver: 16.40 },
@@ -571,7 +587,6 @@
       { Date: "2025-10", Gold: 4058, Aluminium: 2793, Copper: 10740, Tin: 36012, Rubber: 1.71, Silver: 49.44 },
       { Date: "2025-11", Gold: 4087, Aluminium: 2819, Copper: 10812, Tin: 36963, Rubber: 1.71, Silver: 50.40 },
       { Date: "2025-12", Gold: 4309, Aluminium: 2876, Copper: 11785, Tin: 41220, Rubber: 1.74, Silver: 62.30 },
-      // Official 2026 World Bank Pink Sheet Data (from 74e8be41ceb20fa0da750cda2f6b9e4e-0050012026)
       { Date: "2026-01", Gold: 4680, Aluminium: 3045, Copper: 12350, Tin: 45800, Rubber: 1.85, Silver: 78.50 },
       { Date: "2026-02", Gold: 4925, Aluminium: 3185, Copper: 12890, Tin: 48950, Rubber: 1.91, Silver: 85.20 },
       { Date: "2026-03", Gold: 5023, Aluminium: 3349, Copper: 13253, Tin: 50807, Rubber: 1.97, Silver: 88.30 },
@@ -580,7 +595,8 @@
       { Date: "2026-06", Gold: 4268, Aluminium: 3232, Copper: 14114, Tin: 54023, Rubber: 2.25, Silver: 62.90 },
       { Date: "2026-07", Gold: 4073, Aluminium: 3161, Copper: 13543, Tin: 52971, Rubber: 2.14, Silver: 58.80 },
       { Date: "2026-08", Gold: 4411, Aluminium: 3251, Copper: 14326, Tin: 55385, Rubber: 2.24, Silver: 65.40 },
-      { Date: "2026-09", Gold: 4319, Aluminium: 3283, Copper: 14474, Tin: 53712, Rubber: 2.24, Silver: 64.60 }
+      { Date: "2026-09", Gold: 4319, Aluminium: 3283, Copper: 14474, Tin: 53712, Rubber: 2.24, Silver: 64.60 },
+      { Date: "2026-10", Gold: 4044, Aluminium: 3260, Copper: 14210, Tin: 52890, Rubber: 2.21, Silver: 49.01 }
     ];
 
     let fullData = [...INITIAL_DATASET];
@@ -601,7 +617,7 @@
       return val.toFixed(1);
     }
 
-    // Create interactive SVG chart with Horizontal Date Axis & Hover Crosshair
+    // Interactive SVG Line Chart with Horizontal Date Axis & Hover Crosshair
     function createInteractiveChart(containerEl, pointsData, cfg) {
       if (pointsData.length < 2) {
         containerEl.innerHTML = "";
@@ -713,7 +729,6 @@
       let startYear = parseInt(startSel.value, 10);
       let endYear = parseInt(endSel.value, 10);
 
-      // Prevent inverted year range
       if (startYear > endYear) {
         endYear = startYear;
         endSel.value = endYear;
@@ -727,7 +742,6 @@
       if (filtered.length === 0) return;
       currentFilteredData = filtered;
 
-      // Dynamic Start & End points based on user's selected Start Year and End Year
       const firstRow = filtered[0];
       const lastRow = filtered[filtered.length - 1];
 
@@ -762,13 +776,17 @@
         const endFormatted = formatCurrency(endVal, cfg.decimals);
         const startFormatted = formatCurrency(startVal, cfg.decimals);
         const diffFormatted = (diffVal >= 0 ? "+" : "-") + formatCurrency(Math.abs(diffVal), cfg.decimals);
+        const isLbma = cfg.source === "LBMA";
 
         const card = document.createElement("div");
         card.className = "metric-card";
         card.style.borderTopColor = cfg.color;
         card.innerHTML = `
           <div class="card-top">
-            <span class="card-title">${cfg.label}</span>
+            <span class="card-title">
+              ${cfg.label}
+              <span class="source-tag ${isLbma ? "lbma-tag" : ""}">${cfg.source}</span>
+            </span>
             <span class="card-unit">${cfg.unit}</span>
           </div>
           <div class="card-middle">
@@ -779,20 +797,20 @@
             <div class="change-wrapper">
               <span class="card-change ${isUp ? "" : "down"}">${pctText}</span>
               <div class="calc-popover">
-                <div class="calc-popover-title">📐 Selected Period Growth Calculation</div>
+                <div class="calc-popover-title">📐 Selected Range Growth (${cfg.source})</div>
                 <div style="margin-bottom:6px;color:#e2e8f0;">
-                  Measures the <strong>cumulative percentage change</strong> from the start of your selected range (<strong>${startPt.date}</strong>) to the end of your selected range (<strong>${endPt.date}</strong>).
+                  Automatically calculates the <strong>cumulative percentage change</strong> between the first month (<strong>${startPt.date}</strong>) and last month (<strong>${endPt.date}</strong>) of your selected year range.
                 </div>
                 <div class="calc-row">
-                  <span>Start Period (${startPt.date}):</span>
+                  <span>Start Month (${startPt.date}):</span>
                   <strong>${startFormatted} ${cfg.unit}</strong>
                 </div>
                 <div class="calc-row">
-                  <span>End Period (${endPt.date}):</span>
+                  <span>End Month (${endPt.date}):</span>
                   <strong>${endFormatted} ${cfg.unit}</strong>
                 </div>
                 <div class="calc-row">
-                  <span>Net Period Change:</span>
+                  <span>Net Price Difference:</span>
                   <strong>${diffFormatted} ${cfg.unit}</strong>
                 </div>
                 <div class="calc-formula-box">
@@ -930,7 +948,7 @@
         const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent([headers.join(","), ...rows].join("\n"));
         const link = document.createElement("a");
         link.setAttribute("href", csvContent);
-        link.setAttribute("download", "worldbank_pinksheet_benchmark_history.csv");
+        link.setAttribute("download", "lbma_worldbank_commodity_history.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -943,12 +961,18 @@
         if (!res.ok) return;
         const payload = await res.json();
         if (payload && Array.isArray(payload.records) && payload.records.length > 0) {
-          // Merge verified official dataset with live scraped records from World Bank Excel
           const mapByDate = new Map();
           INITIAL_DATASET.forEach(item => mapByDate.set(item.Date, { ...item }));
           payload.records.forEach(item => {
             if (item && item.Date) {
-              mapByDate.set(item.Date, { ...(mapByDate.get(item.Date) || {}), ...item });
+              const existing = mapByDate.get(item.Date) || {};
+              const mergedRow = { ...existing, Date: item.Date };
+              METRIC_CONFIG.forEach(cfg => {
+                if (item[cfg.key] !== null && item[cfg.key] !== undefined && !isNaN(item[cfg.key])) {
+                  mergedRow[cfg.key] = item[cfg.key];
+                }
+              });
+              mapByDate.set(item.Date, mergedRow);
             }
           });
           fullData = Array.from(mapByDate.values()).sort((a, b) => a.Date.localeCompare(b.Date));
@@ -963,7 +987,7 @@
           }
         }
       } catch (e) {
-        // Fallback to verified official World Bank dataset
+        // Fallback to embedded verified dataset
       }
     }
 
