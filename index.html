@@ -340,16 +340,16 @@
       background: #fcfdfe;
       border: 1px solid #f1f5f9;
       border-radius: 8px;
-      height: 175px;
+      height: 185px;
       width: 100%;
       position: relative;
-      padding: 4px;
+      padding: 6px 8px 4px 4px;
       cursor: crosshair;
     }
     .chart-tooltip {
       position: absolute;
       display: none;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.94);
       color: #ffffff;
       padding: 6px 10px;
       border-radius: 6px;
@@ -359,7 +359,7 @@
       white-space: nowrap;
       z-index: 30;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-      transform: translate(-50%, -115%);
+      transform: translate(-50%, -120%);
     }
     /* History Table Section */
     .table-section {
@@ -611,11 +611,118 @@
       });
     }
 
-    function formatAxisLabel(val) {
-      if (val >= 1000) {
-        return (val / 1000).toFixed(1) + "k";
+    // Parse "YYYY-MM" into total months since year 0 for true chronological X-axis spacing
+    function dateToMonths(dateStr) {
+      const parts = dateStr.split("-");
+      return parseInt(parts[0], 10) * 12 + (parseInt(parts[1], 10) - 1);
+    }
+
+    function monthsToDateStr(totalMonths) {
+      const y = Math.floor(totalMonths / 12);
+      const m = (totalMonths % 12) + 1;
+      return y + "-" + String(m).padStart(2, "0");
+    }
+
+    // Compute clean, round financial Y-axis bounds and ticks (4 ticks = 3 intervals)
+    function computeNiceYScale(minVal, maxVal) {
+      const intervals = 3;
+      const rawRange = Math.max(maxVal - minVal, maxVal * 0.1, 0.1);
+      const roughStep = rawRange / intervals;
+      const mag = Math.pow(10, Math.floor(Math.log10(roughStep)));
+      const norm = roughStep / mag;
+
+      const niceMultipliers = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+      let step = niceMultipliers[niceMultipliers.length - 1] * mag;
+      for (let i = 0; i < niceMultipliers.length; i++) {
+        if (norm <= niceMultipliers[i]) {
+          step = niceMultipliers[i] * mag;
+          break;
+        }
       }
-      return val.toFixed(1);
+
+      let niceMin = Math.floor(minVal / step) * step;
+      if (niceMin > 0 && minVal - niceMin < step * 0.08) {
+        niceMin = Math.max(0, niceMin - step);
+      }
+
+      while (niceMin + step * intervals < maxVal * 1.01) {
+        for (let i = 0; i < niceMultipliers.length; i++) {
+          if (niceMultipliers[i] * mag > step) {
+            step = niceMultipliers[i] * mag;
+            break;
+          }
+          if (i === niceMultipliers.length - 1) {
+            step = step * 1.5;
+          }
+        }
+        niceMin = Math.floor(minVal / step) * step;
+      }
+
+      const ticks = [];
+      for (let i = 0; i <= intervals; i++) {
+        ticks.push(Number((niceMin + i * step).toFixed(4)));
+      }
+      return {
+        min: ticks[0],
+        max: ticks[ticks.length - 1],
+        step: step,
+        ticks: ticks
+      };
+    }
+
+    // Format Y-axis tick label cleanly (e.g., $1,000, $15,000, $1.50, $30)
+    function formatYAxisTick(val, step, decimals) {
+      if (val >= 1000) {
+        return "$" + Math.round(val).toLocaleString("en-US");
+      }
+      if (step < 1 || decimals > 0) {
+        const dec = step < 1 ? 2 : (val % 1 !== 0 ? 1 : 0);
+        return "$" + val.toFixed(dec);
+      }
+      return "$" + Math.round(val);
+    }
+
+    // Generate evenly-spaced, clean chronological X-axis ticks
+    function computeChronologicalXTicks(firstMonth, lastMonth, padLeft, plotW) {
+      const spanMonths = lastMonth - firstMonth;
+      const startYear = Math.floor(firstMonth / 12);
+      const endYear = Math.floor(lastMonth / 12);
+      const yearSpan = endYear - startYear;
+
+      const ticks = [];
+
+      if (yearSpan >= 4) {
+        // Multi-year view: show clean Year ticks (e.g., 2016, 2018, 2020, 2022, 2024, 2026)
+        const yearStep = yearSpan >= 8 ? 2 : 1;
+        for (let y = startYear; y <= endYear; y++) {
+          if ((y - startYear) % yearStep === 0 || y === endYear) {
+            // Place year tick at June (month 6) if start is June, else Jan
+            let mTarget = y * 12 + (firstMonth % 12);
+            if (mTarget < firstMonth) mTarget = firstMonth;
+            if (mTarget > lastMonth) mTarget = lastMonth;
+            const ratio = spanMonths > 0 ? (mTarget - firstMonth) / spanMonths : 0;
+            const x = padLeft + ratio * plotW;
+            // Avoid crowding the last two ticks if they are too close
+            if (ticks.length > 0 && Math.abs(x - ticks[ticks.length - 1].x) < 34) {
+              if (y === endYear) {
+                ticks[ticks.length - 1] = { x: padLeft + plotW, label: String(y) };
+              }
+              continue;
+            }
+            ticks.push({ x, label: String(y) });
+          }
+        }
+      } else {
+        // Short 1-3 year view: 5 evenly spaced YYYY-MM ticks
+        const count = 5;
+        for (let i = 0; i < count; i++) {
+          const ratio = i / (count - 1);
+          const m = Math.round(firstMonth + ratio * spanMonths);
+          const x = padLeft + ratio * plotW;
+          ticks.push({ x, label: monthsToDateStr(m) });
+        }
+      }
+      return ticks;
     }
 
     function createInteractiveChart(containerEl, pointsData, cfg) {
@@ -625,53 +732,78 @@
       }
 
       const values = pointsData.map(p => p.val);
-      const minVal = Math.min(...values) * 0.94;
-      const maxVal = Math.max(...values) * 1.04;
-      const midVal = (minVal + maxVal) / 2;
+      const rawMin = Math.min(...values);
+      const rawMax = Math.max(...values);
+      const yScale = computeNiceYScale(rawMin, rawMax);
 
-      const width = 340;
-      const height = 162;
-      const padLeft = 40;
-      const padRight = 14;
-      const padTop = 12;
-      const padBottom = 26;
+      const width = 360;
+      const height = 172;
+      const padLeft = 56;
+      const padRight = 16;
+      const padTop = 14;
+      const padBottom = 30;
       const plotW = width - padLeft - padRight;
       const plotH = height - padTop - padBottom;
 
-      const coords = pointsData.map((pt, idx) => {
-        const x = padLeft + (idx / (pointsData.length - 1)) * plotW;
-        const y = padTop + plotH - ((pt.val - minVal) / (maxVal - minVal || 1)) * plotH;
+      const firstMonth = dateToMonths(pointsData[0].date);
+      const lastMonth = dateToMonths(pointsData[pointsData.length - 1].date);
+      const monthSpan = Math.max(1, lastMonth - firstMonth);
+
+      const coords = pointsData.map((pt) => {
+        const m = dateToMonths(pt.date);
+        const x = padLeft + ((m - firstMonth) / monthSpan) * plotW;
+        const y = padTop + plotH - ((pt.val - yScale.min) / (yScale.max - yScale.min || 1)) * plotH;
         return { x, y, date: pt.date, val: pt.val };
       });
 
       const polylinePoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+      const areaPoints = `${coords[0].x.toFixed(1)},${(padTop + plotH).toFixed(1)} ` +
+                         polylinePoints +
+                         ` ${coords[coords.length - 1].x.toFixed(1)},${(padTop + plotH).toFixed(1)}`;
 
-      const tickCount = Math.min(5, coords.length);
-      let xTicksHtml = "";
-      for (let i = 0; i < tickCount; i++) {
-        const idx = Math.round((i / (tickCount - 1)) * (coords.length - 1));
-        const c = coords[idx];
-        const anchor = i === 0 ? "start" : (i === tickCount - 1 ? "end" : "middle");
-        xTicksHtml += `
-          <line x1="${c.x.toFixed(1)}" y1="${padTop + plotH}" x2="${c.x.toFixed(1)}" y2="${padTop + plotH + 4}" stroke="#cbd5e1" stroke-width="1" />
-          <text x="${c.x.toFixed(1)}" y="${height - 6}" font-size="9.5" fill="#64748b" text-anchor="${anchor}">${c.date}</text>
+      // Render 4 neat horizontal Y-axis gridlines and round labels
+      let yGridHtml = "";
+      yScale.ticks.forEach((tVal, idx) => {
+        const yPos = padTop + plotH - ((tVal - yScale.min) / (yScale.max - yScale.min || 1)) * plotH;
+        const isBottom = idx === 0;
+        const strokeColor = isBottom ? "#cbd5e1" : "#f1f5f9";
+        const labelStr = formatYAxisTick(tVal, yScale.step, cfg.decimals);
+        yGridHtml += `
+          <line x1="${padLeft}" y1="${yPos.toFixed(1)}" x2="${width - padRight}" y2="${yPos.toFixed(1)}" stroke="${strokeColor}" stroke-width="1" />
+          <text x="${padLeft - 8}" y="${(yPos + 3.5).toFixed(1)}" font-size="10" font-weight="500" fill="#64748b" text-anchor="end">${labelStr}</text>
         `;
-      }
+      });
+
+      // Render evenly-spaced chronological X-axis ticks
+      const xTicks = computeChronologicalXTicks(firstMonth, lastMonth, padLeft, plotW);
+      let xTicksHtml = "";
+      xTicks.forEach((tk, idx) => {
+        let anchor = "middle";
+        if (idx === 0) anchor = "middle";
+        if (idx === xTicks.length - 1 && tk.x > width - padRight - 12) anchor = "end";
+        xTicksHtml += `
+          <line x1="${tk.x.toFixed(1)}" y1="${padTop + plotH}" x2="${tk.x.toFixed(1)}" y2="${padTop + plotH + 4}" stroke="#94a3b8" stroke-width="1" />
+          <text x="${tk.x.toFixed(1)}" y="${padTop + plotH + 17}" font-size="10" font-weight="500" fill="#64748b" text-anchor="${anchor}">${tk.label}</text>
+        `;
+      });
+
+      const gradId = "grad-" + cfg.key;
 
       containerEl.innerHTML = `
         <div class="chart-tooltip"></div>
         <svg viewBox="0 0 ${width} ${height}" width="100%" height="100%">
-          <line x1="${padLeft}" y1="${padTop}" x2="${width - padRight}" y2="${padTop}" stroke="#f1f5f9" stroke-width="1" />
-          <line x1="${padLeft}" y1="${padTop + plotH / 2}" x2="${width - padRight}" y2="${padTop + plotH / 2}" stroke="#f1f5f9" stroke-width="1" />
-          <line x1="${padLeft}" y1="${padTop + plotH}" x2="${width - padRight}" y2="${padTop + plotH}" stroke="#cbd5e1" stroke-width="1" />
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${cfg.color}" stop-opacity="0.16" />
+              <stop offset="100%" stop-color="${cfg.color}" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
 
-          <text x="${padLeft - 6}" y="${padTop + 4}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(maxVal)}</text>
-          <text x="${padLeft - 6}" y="${padTop + plotH / 2 + 3}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(midVal)}</text>
-          <text x="${padLeft - 6}" y="${padTop + plotH + 3}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(minVal)}</text>
-
+          ${yGridHtml}
           ${xTicksHtml}
 
-          <polyline fill="none" stroke="${cfg.color}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
+          <polygon fill="url(#${gradId})" points="${areaPoints}" />
+          <polyline fill="none" stroke="${cfg.color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
 
           <line class="hover-guide-line" x1="0" y1="${padTop}" x2="0" y2="${padTop + plotH}" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" visibility="hidden" />
           <circle class="hover-dot" cx="0" cy="0" r="4.5" fill="${cfg.color}" stroke="#ffffff" stroke-width="2" visibility="hidden" />
@@ -711,7 +843,7 @@
         tooltip.style.display = "block";
         tooltip.innerHTML = `📅 ${nearest.date} &nbsp;|&nbsp; <span style="color:#fde047">${formatCurrency(nearest.val, cfg.decimals)}</span> <small>${cfg.unit}</small>`;
 
-        const clampedX = Math.max(65, Math.min(rect.width - 65, pxX));
+        const clampedX = Math.max(70, Math.min(rect.width - 70, pxX));
         tooltip.style.left = clampedX + "px";
         tooltip.style.top = Math.max(28, pxY) + "px";
       });
