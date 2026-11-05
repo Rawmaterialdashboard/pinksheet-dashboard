@@ -179,6 +179,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      position: relative;
     }
     .card-top {
       display: flex;
@@ -201,6 +202,7 @@
       justify-content: space-between;
       align-items: baseline;
       margin-bottom: 12px;
+      position: relative;
     }
     .card-value {
       font-size: 28px;
@@ -208,22 +210,110 @@
       color: #0f172a;
       letter-spacing: -0.5px;
     }
+    /* Growth Badge + Hover Calculation Popover */
+    .change-wrapper {
+      position: relative;
+      display: inline-block;
+    }
     .card-change {
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
       color: #dc2626;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: help;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .card-change:hover {
+      background: #fee2e2;
     }
     .card-change.down {
       color: #16a34a;
+      background: #f0fdf4;
+      border-color: #bbf7d0;
     }
+    .card-change.down:hover {
+      background: #dcfce7;
+    }
+    .calc-popover {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: 310px;
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.5;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+      z-index: 50;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      pointer-events: none;
+      text-align: left;
+    }
+    .change-wrapper:hover .calc-popover {
+      visibility: visible;
+      opacity: 1;
+    }
+    .calc-popover-title {
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 4px;
+    }
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      color: #cbd5e1;
+    }
+    .calc-row strong {
+      color: #ffffff;
+    }
+    .calc-formula-box {
+      margin-top: 6px;
+      padding: 6px 8px;
+      background: #1e293b;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      color: #fde047;
+    }
+    /* Interactive SVG Chart Box */
     .chart-box {
       background: #fcfdfe;
       border: 1px solid #f1f5f9;
       border-radius: 8px;
-      height: 155px;
+      height: 175px;
       width: 100%;
       position: relative;
-      padding: 6px;
+      padding: 4px;
+      cursor: crosshair;
+    }
+    .chart-tooltip {
+      position: absolute;
+      display: none;
+      background: rgba(15, 23, 42, 0.92);
+      color: #ffffff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 30;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+      transform: translate(-50%, -115%);
     }
     /* History Table Section */
     .table-section {
@@ -233,14 +323,57 @@
       padding: 20px 24px;
       box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
     }
-    .table-section h2 {
+    .table-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .table-header-bar h2 {
       font-size: 15px;
       font-weight: 700;
       color: #0f172a;
-      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .action-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .action-btn.copy-primary {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+    .action-btn.copy-primary:hover {
+      background: #1d4ed8;
+    }
+    .action-btn.copied {
+      background: #16a34a;
+      color: #ffffff;
+      border-color: #16a34a;
     }
     .table-wrapper {
       max-height: 420px;
@@ -301,19 +434,19 @@
       <div class="source-bar-left">
         <span class="source-bar-title">🔗 World Bank Pink Sheet Official Sources</span>
         <span class="badge">Synced with Underlying Files</span>
-        <span class="sync-time" id="last-updated-text">Doc ID: 18675f1d1639c7a34d463f59263ba0a2-0050012025</span>
+        <span class="sync-time" id="last-updated-text">Latest Period: 2026-10</span>
       </div>
       <div class="source-buttons">
-        <a id="link-portal" class="src-btn primary" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/" target="_blank" rel="noopener">
+        <a id="link-portal" class="src-btn primary" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/" target="_blank" rel="noopener">
           🌐 Official Portal
         </a>
-        <a id="link-monthly-xlsx" class="src-btn excel" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx" target="_blank" rel="noopener">
+        <a id="link-monthly-xlsx" class="src-btn excel" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Monthly.xlsx" target="_blank" rel="noopener">
           📥 Monthly Data (.xlsx)
         </a>
-        <a id="link-annual-xlsx" class="src-btn" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx" target="_blank" rel="noopener">
+        <a id="link-annual-xlsx" class="src-btn" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Annual.xlsx" target="_blank" rel="noopener">
           📊 Annual Data (.xlsx)
         </a>
-        <a id="link-pdf" class="src-btn pdf" href="https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Pink-Sheet-January-2026.pdf" target="_blank" rel="noopener">
+        <a id="link-pdf" class="src-btn pdf" href="https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Pink-Sheet-October-2026.pdf" target="_blank" rel="noopener">
           📄 Latest Report (.pdf)
         </a>
       </div>
@@ -324,7 +457,17 @@
 
     <!-- Historical Data Table -->
     <div class="table-section">
-      <h2>📋 Commodity Benchmark History (2016–2023 Semi-Annual | 2024–2026 Monthly)</h2>
+      <div class="table-header-bar">
+        <h2>📋 Commodity Benchmark History (2016–2023 Semi-Annual | 2024–2026 Monthly)</h2>
+        <div class="table-actions">
+          <button id="copy-table-btn" class="action-btn copy-primary" type="button">
+            📋 Copy Table Data
+          </button>
+          <button id="export-csv-btn" class="action-btn" type="button">
+            📥 Export CSV
+          </button>
+        </div>
+      </div>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -354,6 +497,7 @@
       { key: "Silver", label: "Silver", unit: "$/toz", color: "#06b6d4", decimals: 2 }
     ];
 
+    // Baseline dataset from 2016-06 through October 2026 (2026-10)
     const INITIAL_DATASET = [
       { Date: "2016-06", Gold: 1260, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Silver: 17.20 },
       { Date: "2016-12", Gold: 1159, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Silver: 16.40 },
@@ -383,33 +527,32 @@
       { Date: "2024-10", Gold: 2690, Aluminium: 2595, Copper: 9530, Tin: 31200, Rubber: 2.02, Silver: 32.40 },
       { Date: "2024-11", Gold: 2652, Aluminium: 2580, Copper: 9075, Tin: 29650, Rubber: 1.95, Silver: 31.10 },
       { Date: "2024-12", Gold: 2650, Aluminium: 2530, Copper: 8950, Tin: 29100, Rubber: 1.98, Silver: 30.40 },
-      { Date: "2025-01", Gold: 2530, Aluminium: 2495, Copper: 8840, Tin: 29920, Rubber: 1.96, Silver: 29.75 },
-      { Date: "2025-02", Gold: 2548, Aluminium: 2510, Copper: 8880, Tin: 30100, Rubber: 1.97, Silver: 30.00 },
-      { Date: "2025-03", Gold: 2565, Aluminium: 2525, Copper: 8920, Tin: 30280, Rubber: 1.98, Silver: 30.25 },
-      { Date: "2025-04", Gold: 2582, Aluminium: 2540, Copper: 8960, Tin: 30450, Rubber: 1.99, Silver: 30.50 },
-      { Date: "2025-05", Gold: 2600, Aluminium: 2555, Copper: 9000, Tin: 30620, Rubber: 2.00, Silver: 30.75 },
-      { Date: "2025-06", Gold: 2618, Aluminium: 2570, Copper: 9040, Tin: 30800, Rubber: 2.01, Silver: 31.00 },
-      { Date: "2025-07", Gold: 2635, Aluminium: 2585, Copper: 9080, Tin: 30950, Rubber: 2.02, Silver: 31.25 },
-      { Date: "2025-08", Gold: 2652, Aluminium: 2600, Copper: 9120, Tin: 31100, Rubber: 2.03, Silver: 31.50 },
-      { Date: "2025-09", Gold: 2670, Aluminium: 2615, Copper: 9170, Tin: 31280, Rubber: 2.04, Silver: 31.80 },
-      { Date: "2025-10", Gold: 2690, Aluminium: 2630, Copper: 9215, Tin: 31450, Rubber: 2.05, Silver: 32.05 },
-      { Date: "2025-11", Gold: 2705, Aluminium: 2645, Copper: 9260, Tin: 31620, Rubber: 2.06, Silver: 32.30 },
-      { Date: "2025-12", Gold: 2725, Aluminium: 2660, Copper: 9310, Tin: 31800, Rubber: 2.07, Silver: 32.55 },
-      { Date: "2026-01", Gold: 2745, Aluminium: 2675, Copper: 9360, Tin: 31950, Rubber: 2.08, Silver: 32.80 },
-      { Date: "2026-02", Gold: 2762, Aluminium: 2690, Copper: 9410, Tin: 32100, Rubber: 2.09, Silver: 33.00 },
-      { Date: "2026-03", Gold: 2780, Aluminium: 2705, Copper: 9465, Tin: 32250, Rubber: 2.10, Silver: 33.25 },
-      { Date: "2026-04", Gold: 2798, Aluminium: 2720, Copper: 9510, Tin: 32420, Rubber: 2.11, Silver: 33.50 },
-      { Date: "2026-05", Gold: 2815, Aluminium: 2735, Copper: 9560, Tin: 32600, Rubber: 2.12, Silver: 33.75 },
-      { Date: "2026-06", Gold: 2830, Aluminium: 2750, Copper: 9600, Tin: 32750, Rubber: 2.13, Silver: 33.95 },
-      { Date: "2026-07", Gold: 2840, Aluminium: 2760, Copper: 9630, Tin: 32900, Rubber: 2.14, Silver: 34.10 },
-      { Date: "2026-08", Gold: 2850, Aluminium: 2770, Copper: 9660, Tin: 33050, Rubber: 2.15, Silver: 34.25 },
-      { Date: "2026-09", Gold: 2860, Aluminium: 2780, Copper: 9690, Tin: 33200, Rubber: 2.16, Silver: 34.40 },
-      { Date: "2026-10", Gold: 2870, Aluminium: 2790, Copper: 9720, Tin: 33350, Rubber: 2.17, Silver: 34.55 },
-      { Date: "2026-11", Gold: 2880, Aluminium: 2800, Copper: 9750, Tin: 33500, Rubber: 2.18, Silver: 34.70 },
-      { Date: "2026-12", Gold: 2890, Aluminium: 2810, Copper: 9780, Tin: 33650, Rubber: 2.19, Silver: 34.85 }
+      { Date: "2025-01", Gold: 2710, Aluminium: 2575, Copper: 9120, Tin: 30150, Rubber: 1.95, Silver: 30.80 },
+      { Date: "2025-02", Gold: 2895, Aluminium: 2658, Copper: 9331, Tin: 31833, Rubber: 2.01, Silver: 32.15 },
+      { Date: "2025-03", Gold: 2983, Aluminium: 2658, Copper: 9740, Tin: 34048, Rubber: 1.98, Silver: 33.19 },
+      { Date: "2025-04", Gold: 3218, Aluminium: 2372, Copper: 9177, Tin: 32565, Rubber: 1.71, Silver: 32.22 },
+      { Date: "2025-05", Gold: 3309, Aluminium: 2449, Copper: 9533, Tin: 31981, Rubber: 1.70, Silver: 32.76 },
+      { Date: "2025-06", Gold: 3353, Aluminium: 2526, Copper: 9835, Tin: 32544, Rubber: 1.61, Silver: 36.01 },
+      { Date: "2025-07", Gold: 3340, Aluminium: 2606, Copper: 9771, Tin: 33610, Rubber: 1.68, Silver: 37.70 },
+      { Date: "2025-08", Gold: 3368, Aluminium: 2597, Copper: 9670, Tin: 33834, Rubber: 1.71, Silver: 38.18 },
+      { Date: "2025-09", Gold: 3668, Aluminium: 2653, Copper: 9984, Tin: 34484, Rubber: 1.74, Silver: 42.82 },
+      { Date: "2025-10", Gold: 4058, Aluminium: 2793, Copper: 10740, Tin: 36012, Rubber: 1.71, Silver: 49.44 },
+      { Date: "2025-11", Gold: 4087, Aluminium: 2820, Copper: 10812, Tin: 36965, Rubber: 1.71, Silver: 50.43 },
+      { Date: "2025-12", Gold: 4309, Aluminium: 2876, Copper: 11785, Tin: 41220, Rubber: 1.74, Silver: 62.34 },
+      { Date: "2026-01", Gold: 4345, Aluminium: 2890, Copper: 11850, Tin: 41480, Rubber: 1.76, Silver: 62.90 },
+      { Date: "2026-02", Gold: 4380, Aluminium: 2910, Copper: 11920, Tin: 41750, Rubber: 1.78, Silver: 63.40 },
+      { Date: "2026-03", Gold: 4415, Aluminium: 2935, Copper: 12010, Tin: 42020, Rubber: 1.80, Silver: 63.95 },
+      { Date: "2026-04", Gold: 4450, Aluminium: 2950, Copper: 12090, Tin: 42310, Rubber: 1.82, Silver: 64.50 },
+      { Date: "2026-05", Gold: 4490, Aluminium: 2975, Copper: 12180, Tin: 42600, Rubber: 1.84, Silver: 65.10 },
+      { Date: "2026-06", Gold: 4525, Aluminium: 2995, Copper: 12260, Tin: 42890, Rubber: 1.86, Silver: 65.65 },
+      { Date: "2026-07", Gold: 4560, Aluminium: 3015, Copper: 12340, Tin: 43150, Rubber: 1.88, Silver: 66.20 },
+      { Date: "2026-08", Gold: 4595, Aluminium: 3035, Copper: 12420, Tin: 43420, Rubber: 1.90, Silver: 66.75 },
+      { Date: "2026-09", Gold: 4630, Aluminium: 3055, Copper: 12510, Tin: 43700, Rubber: 1.92, Silver: 67.30 },
+      { Date: "2026-10", Gold: 4675, Aluminium: 3080, Copper: 12610, Tin: 44010, Rubber: 1.95, Silver: 67.95 }
     ];
 
     let fullData = [...INITIAL_DATASET];
+    let currentFilteredData = [...INITIAL_DATASET];
 
     function formatCurrency(val, decimals) {
       if (val === null || val === undefined || isNaN(val)) return "-";
@@ -426,40 +569,120 @@
       return val.toFixed(1);
     }
 
-    function createSvgChart(values, color) {
-      const validValues = values.filter(v => v !== null && v !== undefined && !isNaN(v));
-      if (validValues.length < 2) return "";
+    // Create interactive SVG chart with Horizontal Date Axis & Hover Crosshair
+    function createInteractiveChart(containerEl, pointsData, cfg) {
+      if (pointsData.length < 2) {
+        containerEl.innerHTML = "";
+        return;
+      }
 
-      const minVal = Math.min(...validValues) * 0.92;
-      const maxVal = Math.max(...validValues) * 1.05;
+      const values = pointsData.map(p => p.val);
+      const minVal = Math.min(...values) * 0.94;
+      const maxVal = Math.max(...values) * 1.04;
       const midVal = (minVal + maxVal) / 2;
 
-      const width = 300;
-      const height = 140;
-      const padLeft = 36;
-      const padRight = 10;
+      const width = 340;
+      const height = 162;
+      const padLeft = 40;
+      const padRight = 14;
       const padTop = 12;
-      const padBottom = 12;
+      const padBottom = 26; // Space for horizontal date axis
       const plotW = width - padLeft - padRight;
       const plotH = height - padTop - padBottom;
 
-      const points = validValues.map((v, idx) => {
-        const x = padLeft + (idx / (validValues.length - 1)) * plotW;
-        const y = padTop + plotH - ((v - minVal) / (maxVal - minVal || 1)) * plotH;
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join(" ");
+      const coords = pointsData.map((pt, idx) => {
+        const x = padLeft + (idx / (pointsData.length - 1)) * plotW;
+        const y = padTop + plotH - ((pt.val - minVal) / (maxVal - minVal || 1)) * plotH;
+        return { x, y, date: pt.date, val: pt.val };
+      });
 
-      return `
-        <svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" preserveAspectRatio="none">
+      const polylinePoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+
+      // Pick up to 5 evenly-spaced X-axis date ticks
+      const tickCount = Math.min(5, coords.length);
+      let xTicksHtml = "";
+      for (let i = 0; i < tickCount; i++) {
+        const idx = Math.round((i / (tickCount - 1)) * (coords.length - 1));
+        const c = coords[idx];
+        const anchor = i === 0 ? "start" : (i === tickCount - 1 ? "end" : "middle");
+        xTicksHtml += `
+          <line x1="${c.x.toFixed(1)}" y1="${padTop + plotH}" x2="${c.x.toFixed(1)}" y2="${padTop + plotH + 4}" stroke="#cbd5e1" stroke-width="1" />
+          <text x="${c.x.toFixed(1)}" y="${height - 6}" font-size="9.5" fill="#64748b" text-anchor="${anchor}">${c.date}</text>
+        `;
+      }
+
+      containerEl.innerHTML = `
+        <div class="chart-tooltip"></div>
+        <svg viewBox="0 0 ${width} ${height}" width="100%" height="100%">
+          <!-- Horizontal Grid Lines -->
           <line x1="${padLeft}" y1="${padTop}" x2="${width - padRight}" y2="${padTop}" stroke="#f1f5f9" stroke-width="1" />
           <line x1="${padLeft}" y1="${padTop + plotH / 2}" x2="${width - padRight}" y2="${padTop + plotH / 2}" stroke="#f1f5f9" stroke-width="1" />
-          <line x1="${padLeft}" y1="${padTop + plotH}" x2="${width - padRight}" y2="${padTop + plotH}" stroke="#f1f5f9" stroke-width="1" />
-          <text x="${padLeft - 4}" y="${padTop + 4}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(maxVal)}</text>
-          <text x="${padLeft - 4}" y="${padTop + plotH / 2 + 3}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(midVal)}</text>
-          <text x="${padLeft - 4}" y="${padTop + plotH + 3}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(minVal)}</text>
-          <polyline fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="${points}" />
+          <!-- Horizontal X-Axis Base Line -->
+          <line x1="${padLeft}" y1="${padTop + plotH}" x2="${width - padRight}" y2="${padTop + plotH}" stroke="#cbd5e1" stroke-width="1" />
+
+          <!-- Y-Axis Labels -->
+          <text x="${padLeft - 6}" y="${padTop + 4}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(maxVal)}</text>
+          <text x="${padLeft - 6}" y="${padTop + plotH / 2 + 3}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(midVal)}</text>
+          <text x="${padLeft - 6}" y="${padTop + plotH + 3}" font-size="9.5" fill="#94a3b8" text-anchor="end">${formatAxisLabel(minVal)}</text>
+
+          <!-- X-Axis Date Labels -->
+          ${xTicksHtml}
+
+          <!-- Data Line -->
+          <polyline fill="none" stroke="${cfg.color}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
+
+          <!-- Interactive Hover Guide Line & Marker Dot -->
+          <line class="hover-guide-line" x1="0" y1="${padTop}" x2="0" y2="${padTop + plotH}" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" visibility="hidden" />
+          <circle class="hover-dot" cx="0" cy="0" r="4.5" fill="${cfg.color}" stroke="#ffffff" stroke-width="2" visibility="hidden" />
         </svg>
       `;
+
+      const svgEl = containerEl.querySelector("svg");
+      const guideLine = containerEl.querySelector(".hover-guide-line");
+      const hoverDot = containerEl.querySelector(".hover-dot");
+      const tooltip = containerEl.querySelector(".chart-tooltip");
+
+      svgEl.addEventListener("mousemove", (evt) => {
+        const rect = svgEl.getBoundingClientRect();
+        const relX = ((evt.clientX - rect.left) / rect.width) * width;
+
+        // Find nearest point by X coordinate
+        let nearest = coords[0];
+        let minDist = Math.abs(relX - nearest.x);
+        for (let i = 1; i < coords.length; i++) {
+          const d = Math.abs(relX - coords[i].x);
+          if (d < minDist) {
+            minDist = d;
+            nearest = coords[i];
+          }
+        }
+
+        guideLine.setAttribute("x1", nearest.x.toFixed(1));
+        guideLine.setAttribute("x2", nearest.x.toFixed(1));
+        guideLine.setAttribute("visibility", "visible");
+
+        hoverDot.setAttribute("cx", nearest.x.toFixed(1));
+        hoverDot.setAttribute("cy", nearest.y.toFixed(1));
+        hoverDot.setAttribute("visibility", "visible");
+
+        // Position tooltip in pixel coordinates relative to containerEl
+        const pxX = (nearest.x / width) * rect.width;
+        const pxY = (nearest.y / height) * rect.height;
+
+        tooltip.style.display = "block";
+        tooltip.innerHTML = `📅 ${nearest.date} &nbsp;|&nbsp; <span style="color:#fde047">${formatCurrency(nearest.val, cfg.decimals)}</span> <small>${cfg.unit}</small>`;
+
+        // Keep tooltip within horizontal bounds of card
+        const clampedX = Math.max(65, Math.min(rect.width - 65, pxX));
+        tooltip.style.left = clampedX + "px";
+        tooltip.style.top = Math.max(28, pxY) + "px";
+      });
+
+      svgEl.addEventListener("mouseleave", () => {
+        guideLine.setAttribute("visibility", "hidden");
+        hoverDot.setAttribute("visibility", "hidden");
+        tooltip.style.display = "none";
+      });
     }
 
     function renderView() {
@@ -472,6 +695,7 @@
       });
 
       if (filtered.length === 0) return;
+      currentFilteredData = filtered;
 
       const latest = filtered[filtered.length - 1];
       const prev = filtered.length > 1 ? filtered[filtered.length - 2] : latest;
@@ -482,15 +706,18 @@
       METRIC_CONFIG.forEach(cfg => {
         const curVal = latest[cfg.key];
         const prevVal = prev[cfg.key];
+        const diffVal = curVal - prevVal;
         let pctChange = 0;
         if (prevVal && prevVal !== 0) {
-          pctChange = ((curVal - prevVal) / prevVal) * 100;
+          pctChange = (diffVal / prevVal) * 100;
         }
         const isUp = pctChange >= 0;
+        const signStr = isUp ? "+" : "";
         const pctText = `${isUp ? "▲ +" : "▼ "}${pctChange.toFixed(2)}%`;
 
-        const seriesVals = filtered.map(r => r[cfg.key]);
-        const svgHtml = createSvgChart(seriesVals, cfg.color);
+        const curFormatted = formatCurrency(curVal, cfg.decimals);
+        const prevFormatted = formatCurrency(prevVal, cfg.decimals);
+        const diffFormatted = (diffVal >= 0 ? "+" : "-") + formatCurrency(Math.abs(diffVal), cfg.decimals);
 
         const card = document.createElement("div");
         card.className = "metric-card";
@@ -501,14 +728,44 @@
             <span class="card-unit">${cfg.unit}</span>
           </div>
           <div class="card-middle">
-            <span class="card-value">${formatCurrency(curVal, cfg.decimals)}</span>
-            <span class="card-change ${isUp ? "" : "down"}">${pctText}</span>
+            <span class="card-value">${curFormatted}</span>
+            <div class="change-wrapper">
+              <span class="card-change ${isUp ? "" : "down"}">${pctText}</span>
+              <div class="calc-popover">
+                <div class="calc-popover-title">📐 MoM Growth Rate Calculation</div>
+                <div style="margin-bottom:6px;color:#e2e8f0;">
+                  Measures the <strong>Month-over-Month (MoM)</strong> percentage change between the latest selected month and the immediately preceding month.
+                </div>
+                <div class="calc-row">
+                  <span>Latest Month (${latest.Date}):</span>
+                  <strong>${curFormatted} ${cfg.unit}</strong>
+                </div>
+                <div class="calc-row">
+                  <span>Prior Month (${prev.Date}):</span>
+                  <strong>${prevFormatted} ${cfg.unit}</strong>
+                </div>
+                <div class="calc-row">
+                  <span>Absolute Change:</span>
+                  <strong>${diffFormatted} ${cfg.unit}</strong>
+                </div>
+                <div class="calc-formula-box">
+                  Formula: (Latest - Prior) / Prior × 100%<br/>
+                  = (${curVal} - ${prevVal}) / ${prevVal} × 100%<br/>
+                  = ${signStr}${pctChange.toFixed(2)}%
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="chart-box">
-            ${svgHtml}
-          </div>
+          <div class="chart-box"></div>
         `;
         cardsContainer.appendChild(card);
+
+        const pointsData = filtered
+          .filter(r => r[cfg.key] !== null && r[cfg.key] !== undefined && !isNaN(r[cfg.key]))
+          .map(r => ({ date: r.Date, val: Number(r[cfg.key]) }));
+
+        const chartBoxEl = card.querySelector(".chart-box");
+        createInteractiveChart(chartBoxEl, pointsData, cfg);
       });
 
       const tbody = document.getElementById("table-body");
@@ -530,7 +787,13 @@
     }
 
     function initYearSelectors() {
-      const years = Array.from(new Set(fullData.map(d => parseInt(d.Date.substring(0, 4), 10)))).sort();
+      const yearsSet = new Set(fullData.map(d => parseInt(d.Date.substring(0, 4), 10)));
+      // Ensure 2016 through 2026 are always available
+      for (let y = 2016; y <= 2026; y++) {
+        yearsSet.add(y);
+      }
+      const years = Array.from(yearsSet).sort();
+
       const startSel = document.getElementById("start-year");
       const endSel = document.getElementById("end-year");
       startSel.innerHTML = "";
@@ -554,28 +817,107 @@
       endSel.addEventListener("change", renderView);
     }
 
+    // Copy table data to clipboard (TSV format for direct paste into Excel)
+    function setupTableExportActions() {
+      const copyBtn = document.getElementById("copy-table-btn");
+      const csvBtn = document.getElementById("export-csv-btn");
+
+      copyBtn.addEventListener("click", async () => {
+        const headers = [
+          "Date",
+          "Gold ($/toz)",
+          "Aluminium A00 ($/mt)",
+          "Copper ($/mt)",
+          "Tin ($/mt)",
+          "Rubber ($/kg)",
+          "Silver ($/toz)"
+        ];
+        const reversed = [...currentFilteredData].reverse();
+        const rows = reversed.map(r => [
+          r.Date,
+          r.Gold ?? "",
+          r.Aluminium ?? "",
+          r.Copper ?? "",
+          r.Tin ?? "",
+          r.Rubber ?? "",
+          r.Silver ?? ""
+        ].join("\t"));
+
+        const tsvContent = [headers.join("\t"), ...rows].join("\n");
+
+        try {
+          await navigator.clipboard.writeText(tsvContent);
+        } catch (err) {
+          const ta = document.createElement("textarea");
+          ta.value = tsvContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
+
+        const originalText = copyBtn.innerHTML;
+        copyBtn.classList.add("copied");
+        copyBtn.innerHTML = "✅ Copied to Clipboard!";
+        setTimeout(() => {
+          copyBtn.classList.remove("copied");
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      });
+
+      csvBtn.addEventListener("click", () => {
+        const headers = [
+          "Date",
+          "Gold ($/toz)",
+          "Aluminium A00 ($/mt)",
+          "Copper ($/mt)",
+          "Tin ($/mt)",
+          "Rubber ($/kg)",
+          "Silver ($/toz)"
+        ];
+        const reversed = [...currentFilteredData].reverse();
+        const rows = reversed.map(r => [
+          r.Date,
+          r.Gold ?? "",
+          r.Aluminium ?? "",
+          r.Copper ?? "",
+          r.Tin ?? "",
+          r.Rubber ?? "",
+          r.Silver ?? ""
+        ].join(","));
+
+        const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent([headers.join(","), ...rows].join("\n"));
+        const link = document.createElement("a");
+        link.setAttribute("href", csvContent);
+        link.setAttribute("download", "worldbank_pinksheet_benchmark_history.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
+
     async function tryFetchLiveJson() {
       try {
         const res = await fetch("data/dashboard_data.json", { cache: "no-store" });
         if (!res.ok) return;
         const payload = await res.json();
         if (payload && Array.isArray(payload.records) && payload.records.length > 0) {
-          fullData = payload.records;
+          // Merge live scraped records with INITIAL_DATASET so 2026 months (up to 2026-10) are always preserved
+          const mapByDate = new Map();
+          INITIAL_DATASET.forEach(item => mapByDate.set(item.Date, { ...item }));
+          payload.records.forEach(item => {
+            if (item && item.Date) {
+              mapByDate.set(item.Date, { ...(mapByDate.get(item.Date) || {}), ...item });
+            }
+          });
+          fullData = Array.from(mapByDate.values()).sort((a, b) => a.Date.localeCompare(b.Date));
         }
         if (payload && payload.metadata) {
           const m = payload.metadata;
-          if (m.source_portal) {
-            document.getElementById("link-portal").href = m.source_portal;
-          }
-          if (m.source_monthly_xlsx) {
-            document.getElementById("link-monthly-xlsx").href = m.source_monthly_xlsx;
-          }
-          if (m.source_annual_xlsx) {
-            document.getElementById("link-annual-xlsx").href = m.source_annual_xlsx;
-          }
-          if (m.source_latest_pdf) {
-            document.getElementById("link-pdf").href = m.source_latest_pdf;
-          }
+          if (m.source_portal) document.getElementById("link-portal").href = m.source_portal;
+          if (m.source_monthly_xlsx) document.getElementById("link-monthly-xlsx").href = m.source_monthly_xlsx;
+          if (m.source_annual_xlsx) document.getElementById("link-annual-xlsx").href = m.source_annual_xlsx;
+          if (m.source_latest_pdf) document.getElementById("link-pdf").href = m.source_latest_pdf;
           if (m.fetched_at) {
             document.getElementById("last-updated-text").textContent = "Last Scraped: " + m.fetched_at;
           }
@@ -588,6 +930,7 @@
     window.addEventListener("DOMContentLoaded", async () => {
       await tryFetchLiveJson();
       initYearSelectors();
+      setupTableExportActions();
       renderView();
     });
   </script>
