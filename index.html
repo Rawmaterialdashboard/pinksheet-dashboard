@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Module 2: Raw Material Metals (LBMA, World Bank, Outokumpu 1.4057 & ChinaTungsten)</title>
+  <title>Module 2: Raw Material Metals (2016–2023 Semi-Annual | 2024–2026 Monthly)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -164,7 +164,7 @@
       color: #6b21a8;
       border-color: #e9d5ff;
     }
-    /* Cards Grid (3 columns) */
+    /* Cards Grid (3 columns x 3 rows inside the single Module 2) */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -511,13 +511,13 @@
       </div>
     </div>
 
-    <!-- 9 Cards Grid (3x3) -->
+    <!-- Unified 9 Cards Grid (Original 6 + 3 New Items inside Module 2) -->
     <div class="cards-grid" id="cards-container"></div>
 
     <!-- Historical Data Table -->
     <div class="table-section">
       <div class="table-header-bar">
-        <h2>📋 Commodity Benchmark History (Unpublished Historical Months Shown as "-")</h2>
+        <h2>📋 Commodity Benchmark History (2016–2023 Semi-Annual | 2024–2026 Monthly)</h2>
         <div class="table-actions">
           <button id="copy-table-btn" class="action-btn copy-primary" type="button">
             📋 Copy Table Data
@@ -533,12 +533,12 @@
             <tr>
               <th>Date</th>
               <th>Gold ($/toz)</th>
-              <th>Silver ($/toz)</th>
-              <th>Platinum ($/toz)</th>
               <th>Aluminium A00 ($/mt)</th>
               <th>Copper ($/mt)</th>
               <th>Tin ($/mt)</th>
               <th>Rubber ($/kg)</th>
+              <th>Silver ($/toz)</th>
+              <th>Platinum ($/toz)</th>
               <th>Steel 1.4057 (€/kg)</th>
               <th>Tungsten 65% (¥/mt)</th>
             </tr>
@@ -555,24 +555,20 @@
     const STEEL_URL = "https://einsal.com/en/tools/energy-scrap-alloy-surcharge";
     const TUNGSTEN_URL = "http://news.chinatungsten.com/cn/tungsten-jewelry-news/20-tungsten-news-cn/tungsten-product-news/174387-tpn-15074.html";
 
-    const METRIC_CONFIG = [
+    // Original 6 commodities preserved in exact order + 3 new commodities appended in the same module
+    const METRIC_CONFIG = Array.of(
       { key: "Gold", label: "Gold", source: "LBMA Official", sourceUrl: LBMA_URL, symbol: "$", unit: "$/toz", color: "#eab308", decimals: 0 },
-      { key: "Silver", label: "Silver", source: "LBMA Official", sourceUrl: LBMA_URL, symbol: "$", unit: "$/toz", color: "#06b6d4", decimals: 2 },
-      { key: "Platinum", label: "Platinum", source: "LBMA Official", sourceUrl: LBMA_URL, symbol: "$", unit: "$/toz", color: "#6366f1", decimals: 0 },
       { key: "Aluminium", label: "Aluminium A00", source: "WB Pink Sheet", sourceUrl: WB_URL, symbol: "$", unit: "$/mt", color: "#2563eb", decimals: 0 },
       { key: "Copper", label: "Copper", source: "WB Pink Sheet", sourceUrl: WB_URL, symbol: "$", unit: "$/mt", color: "#ea580c", decimals: 0 },
       { key: "Tin", label: "Tin", source: "WB Pink Sheet", sourceUrl: WB_URL, symbol: "$", unit: "$/mt", color: "#9333ea", decimals: 0 },
       { key: "Rubber", label: "Rubber", source: "WB Pink Sheet", sourceUrl: WB_URL, symbol: "$", unit: "$/kg", color: "#10b981", decimals: 2 },
+      { key: "Silver", label: "Silver", source: "LBMA Official", sourceUrl: LBMA_URL, symbol: "$", unit: "$/toz", color: "#06b6d4", decimals: 2 },
+      { key: "Platinum", label: "Platinum", source: "LBMA Official", sourceUrl: LBMA_URL, symbol: "$", unit: "$/toz", color: "#6366f1", decimals: 0 },
       { key: "Steel14057", label: "Steel 1.4057 Surcharge", source: "EU 1.4057 Bar", sourceUrl: STEEL_URL, symbol: "€", unit: "€/kg", color: "#475569", decimals: 2 },
       { key: "Tungsten65", label: "Tungsten (65% Wolframite)", source: "ChinaTungsten", sourceUrl: TUNGSTEN_URL, symbol: "¥", unit: "RMB/mt", color: "#be123c", decimals: 0 }
-    ];
+    );
 
-    // ZERO FABRICATION DATASET:
-    // - Gold, Silver, Platinum: Verified LBMA historical & 2024-2026 monthly series
-    // - Aluminium, Copper, Tin, Rubber: Verified World Bank Pink Sheet series
-    // - Steel14057: Only verified published monthly surcharges (2021-06 & 2024-10 to 2026-08); unarchived months are null
-    // - Tungsten65: Only verified quote from 174387-tpn-15074.html (2026-01: 530,000 RMB/mt, up 15.2% from Jan 1 460,000 RMB/mt); other months are null
-    const INITIAL_DATASET = [
+    const INITIAL_DATASET = Array.of(
       { Date: "2016-06", Gold: 1276, Silver: 17.20, Platinum: 993, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Steel14057: null, Tungsten65: null },
       { Date: "2016-12", Gold: 1152, Silver: 16.40, Platinum: 917, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Steel14057: null, Tungsten65: null },
       { Date: "2017-06", Gold: 1260, Silver: 16.95, Platinum: 932, Aluminium: 1886, Copper: 5699, Tin: 19635, Rubber: 1.55, Steel14057: null, Tungsten65: null },
@@ -623,10 +619,10 @@
       { Date: "2026-08", Gold: 4411, Silver: 65.40, Platinum: 1545, Aluminium: 3251, Copper: 14326, Tin: 55385, Rubber: 2.24, Steel14057: 1.30, Tungsten65: null },
       { Date: "2026-09", Gold: 4319, Silver: 64.60, Platinum: 1490, Aluminium: 3283, Copper: 14474, Tin: 53712, Rubber: 2.24, Steel14057: null, Tungsten65: null },
       { Date: "2026-10", Gold: 4044, Silver: 49.01, Platinum: 1441, Aluminium: 3260, Copper: 14210, Tin: 52890, Rubber: 2.21, Steel14057: null, Tungsten65: null }
-    ];
+    );
 
-    let fullData = [...INITIAL_DATASET];
-    let currentFilteredData = [...INITIAL_DATASET];
+    let fullData = INITIAL_DATASET.slice();
+    let currentFilteredData = INITIAL_DATASET.slice();
 
     function formatValue(val, symbol, decimals) {
       if (val === null || val === undefined || isNaN(val)) return "-";
@@ -637,8 +633,10 @@
     }
 
     function dateToMonths(dateStr) {
-      const parts = dateStr.split("-");
-      return parseInt(parts[0], 10) * 12 + (parseInt(parts, 10) - 1);
+      const parts = String(dateStr).split("-");
+      const yr = parseInt(parts.at(0), 10);
+      const mo = parseInt(parts.at(1), 10);
+      return yr * 12 + (mo - 1);
     }
 
     function monthsToDateStr(totalMonths) {
@@ -654,11 +652,11 @@
       const mag = Math.pow(10, Math.floor(Math.log10(roughStep)));
       const norm = roughStep / mag;
 
-      const niceMultipliers =;
-      let step = niceMultipliers[niceMultipliers.length - 1] * mag;
+      const niceMultipliers = Array.of(1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10);
+      let step = niceMultipliers.at(niceMultipliers.length - 1) * mag;
       for (let i = 0; i < niceMultipliers.length; i++) {
-        if (norm <= niceMultipliers[i]) {
-          step = niceMultipliers[i] * mag;
+        if (norm <= niceMultipliers.at(i)) {
+          step = niceMultipliers.at(i) * mag;
           break;
         }
       }
@@ -670,8 +668,8 @@
 
       while (niceMin + step * intervals < maxVal * 1.01) {
         for (let i = 0; i < niceMultipliers.length; i++) {
-          if (niceMultipliers[i] * mag > step) {
-            step = niceMultipliers[i] * mag;
+          if (niceMultipliers.at(i) * mag > step) {
+            step = niceMultipliers.at(i) * mag;
             break;
           }
           if (i === niceMultipliers.length - 1) {
@@ -681,13 +679,13 @@
         niceMin = Math.floor(minVal / step) * step;
       }
 
-      const ticks = [];
+      const ticks = Array.of();
       for (let i = 0; i <= intervals; i++) {
         ticks.push(Number((niceMin + i * step).toFixed(4)));
       }
       return {
-        min: ticks[0],
-        max: ticks[ticks.length - 1],
+        min: ticks.at(0),
+        max: ticks.at(ticks.length - 1),
         step: step,
         ticks: ticks
       };
@@ -710,7 +708,7 @@
       const endYear = Math.floor(lastMonth / 12);
       const yearSpan = endYear - startYear;
 
-      const ticks = [];
+      const ticks = Array.of();
       if (yearSpan >= 4) {
         const yearStep = yearSpan >= 8 ? 2 : 1;
         for (let y = startYear; y <= endYear; y++) {
@@ -720,9 +718,9 @@
             if (mTarget > lastMonth) mTarget = lastMonth;
             const ratio = (mTarget - firstMonth) / spanMonths;
             const x = padLeft + ratio * plotW;
-            if (ticks.length > 0 && Math.abs(x - ticks[ticks.length - 1].x) < 34) {
+            if (ticks.length > 0 && Math.abs(x - ticks.at(ticks.length - 1).x) < 34) {
               if (y === endYear) {
-                ticks[ticks.length - 1] = { x: padLeft + plotW, label: String(y) };
+                ticks.splice(ticks.length - 1, 1, { x: padLeft + plotW, label: String(y) });
               }
               continue;
             }
@@ -761,8 +759,8 @@
       const plotW = width - padLeft - padRight;
       const plotH = height - padTop - padBottom;
 
-      const firstMonth = dateToMonths(pointsData[0].date);
-      const lastMonth = dateToMonths(pointsData[pointsData.length - 1].date);
+      const firstMonth = dateToMonths(pointsData.at(0).date);
+      const lastMonth = dateToMonths(pointsData.at(pointsData.length - 1).date);
       const monthSpan = Math.max(1, lastMonth - firstMonth);
 
       const coords = pointsData.map((pt) => {
@@ -775,9 +773,11 @@
       });
 
       const polylinePoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
-      const areaPoints = `${coords[0].x.toFixed(1)},${(padTop + plotH).toFixed(1)} ` +
+      const firstCoord = coords.at(0);
+      const lastCoord = coords.at(coords.length - 1);
+      const areaPoints = `${firstCoord.x.toFixed(1)},${(padTop + plotH).toFixed(1)} ` +
                          polylinePoints +
-                         ` ${coords[coords.length - 1].x.toFixed(1)},${(padTop + plotH).toFixed(1)}`;
+                         ` ${lastCoord.x.toFixed(1)},${(padTop + plotH).toFixed(1)}`;
 
       let yGridHtml = "";
       yScale.ticks.forEach((tVal, idx) => {
@@ -834,13 +834,14 @@
         const rect = svgEl.getBoundingClientRect();
         const relX = ((evt.clientX - rect.left) / rect.width) * width;
 
-        let nearest = coords[0];
+        let nearest = coords.at(0);
         let minDist = Math.abs(relX - nearest.x);
         for (let i = 1; i < coords.length; i++) {
-          const d = Math.abs(relX - coords[i].x);
+          const item = coords.at(i);
+          const d = Math.abs(relX - item.x);
           if (d < minDist) {
             minDist = d;
-            nearest = coords[i];
+            nearest = item;
           }
         }
 
@@ -889,8 +890,8 @@
       if (filtered.length === 0) return;
       currentFilteredData = filtered;
 
-      const firstRow = filtered[0];
-      const lastRow = filtered[filtered.length - 1];
+      const firstRow = filtered.at(0);
+      const lastRow = filtered.at(filtered.length - 1);
 
       const rangePill = document.getElementById("active-range-pill");
       if (rangePill) {
@@ -905,8 +906,8 @@
           .filter(r => r[cfg.key] !== null && r[cfg.key] !== undefined && !isNaN(r[cfg.key]))
           .map(r => ({ date: r.Date, val: Number(r[cfg.key]) }));
 
-        const startPt = validPoints.length > 0 ? validPoints[0] : { date: "-", val: null };
-        const endPt = validPoints.length > 0 ? validPoints[validPoints.length - 1] : { date: "-", val: null };
+        const startPt = validPoints.length > 0 ? validPoints.at(0) : { date: "-", val: null };
+        const endPt = validPoints.length > 0 ? validPoints.at(validPoints.length - 1) : { date: "-", val: null };
 
         const startVal = startPt.val;
         const endVal = endPt.val;
@@ -980,18 +981,18 @@
 
       const tbody = document.getElementById("table-body");
       tbody.innerHTML = "";
-      const reversed = [...filtered].reverse();
+      const reversed = filtered.slice().reverse();
       reversed.forEach(r => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${r.Date}</td>
           <td>${formatValue(r.Gold, "$", 0)}</td>
-          <td>${formatValue(r.Silver, "$", 2)}</td>
-          <td>${formatValue(r.Platinum, "$", 0)}</td>
           <td>${formatValue(r.Aluminium, "$", 0)}</td>
           <td>${formatValue(r.Copper, "$", 0)}</td>
           <td>${formatValue(r.Tin, "$", 0)}</td>
           <td>${formatValue(r.Rubber, "$", 2)}</td>
+          <td>${formatValue(r.Silver, "$", 2)}</td>
+          <td>${formatValue(r.Platinum, "$", 0)}</td>
           <td>${formatValue(r.Steel14057, "€", 2)}</td>
           <td>${formatValue(r.Tungsten65, "¥", 0)}</td>
         `;
@@ -1015,13 +1016,13 @@
         const opt1 = document.createElement("option");
         opt1.value = y;
         opt1.textContent = y;
-        if (y === years[0]) opt1.selected = true;
+        if (y === years.at(0)) opt1.selected = true;
         startSel.appendChild(opt1);
 
         const opt2 = document.createElement("option");
         opt2.value = y;
         opt2.textContent = y;
-        if (y === years[years.length - 1]) opt2.selected = true;
+        if (y === years.at(years.length - 1)) opt2.selected = true;
         endSel.appendChild(opt2);
       });
 
@@ -1033,35 +1034,35 @@
       const copyBtn = document.getElementById("copy-table-btn");
       const csvBtn = document.getElementById("export-csv-btn");
 
-      const headers = [
+      const headers = Array.of(
         "Date",
         "Gold ($/toz)",
-        "Silver ($/toz)",
-        "Platinum ($/toz)",
         "Aluminium A00 ($/mt)",
         "Copper ($/mt)",
         "Tin ($/mt)",
         "Rubber ($/kg)",
+        "Silver ($/toz)",
+        "Platinum ($/toz)",
         "Steel 1.4057 (€/kg)",
         "Tungsten 65% (¥/mt)"
-      ];
+      );
 
       copyBtn.addEventListener("click", async () => {
-        const reversed = [...currentFilteredData].reverse();
-        const rows = reversed.map(r => [
+        const reversed = currentFilteredData.slice().reverse();
+        const rows = reversed.map(r => Array.of(
           r.Date,
           r.Gold ?? "",
-          r.Silver ?? "",
-          r.Platinum ?? "",
           r.Aluminium ?? "",
           r.Copper ?? "",
           r.Tin ?? "",
           r.Rubber ?? "",
+          r.Silver ?? "",
+          r.Platinum ?? "",
           r.Steel14057 ?? "",
           r.Tungsten65 ?? ""
-        ].join("\t"));
+        ).join("\t"));
 
-        const tsvContent = [headers.join("\t"), ...rows].join("\n");
+        const tsvContent = Array.of(headers.join("\t"), ...rows).join("\n");
 
         try {
           await navigator.clipboard.writeText(tsvContent);
@@ -1084,24 +1085,24 @@
       });
 
       csvBtn.addEventListener("click", () => {
-        const reversed = [...currentFilteredData].reverse();
-        const rows = reversed.map(r => [
+        const reversed = currentFilteredData.slice().reverse();
+        const rows = reversed.map(r => Array.of(
           r.Date,
           r.Gold ?? "",
-          r.Silver ?? "",
-          r.Platinum ?? "",
           r.Aluminium ?? "",
           r.Copper ?? "",
           r.Tin ?? "",
           r.Rubber ?? "",
+          r.Silver ?? "",
+          r.Platinum ?? "",
           r.Steel14057 ?? "",
           r.Tungsten65 ?? ""
-        ].join(","));
+        ).join(","));
 
-        const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent([headers.join(","), ...rows].join("\n"));
+        const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(Array.of(headers.join(","), ...rows).join("\n"));
         const link = document.createElement("a");
         link.setAttribute("href", csvContent);
-        link.setAttribute("download", "multi_source_commodity_history.csv");
+        link.setAttribute("download", "commodity_benchmark_history.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
