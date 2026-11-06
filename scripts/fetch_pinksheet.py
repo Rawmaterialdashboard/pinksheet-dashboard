@@ -6,10 +6,14 @@ import datetime
 import requests
 import pandas as pd
 
-# 1. Target URLs
+# 1. Official Target URLs
 LBMA_PORTAL_URL = "https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices"
 DEFAULT_LBMA_GOLD_URL = "https://prices.lbma.org.uk/json/gold_pm.json"
 DEFAULT_LBMA_SILVER_URL = "https://prices.lbma.org.uk/json/silver.json"
+DEFAULT_LBMA_PLATINUM_URL = "https://prices.lbma.org.uk/json/platinum_pm.json"
+
+STEEL_14057_URL = "https://einsal.com/en/tools/energy-scrap-alloy-surcharge"
+CHINATUNGSTEN_URL = "http://news.chinatungsten.com/cn/tungsten-jewelry-news/20-tungsten-news-cn/tungsten-product-news/174387-tpn-15074.html"
 
 DOC_ID_2026 = "74e8be41ceb20fa0da750cda2f6b9e4e-0050012026"
 DOC_ID_2025 = "18675f1d1639c7a34d463f59263ba0a2-0050012025"
@@ -22,7 +26,8 @@ COLUMN_MAPPING = {
     "Copper": "Copper",
     "Tin": "Tin",
     "Rubber, TSR20": "Rubber",
-    "Silver": "Silver"
+    "Silver": "Silver",
+    "Platinum": "Platinum"
 }
 
 HEADERS = {
@@ -31,9 +36,10 @@ HEADERS = {
 }
 
 def scrape_lbma_portal_endpoints():
-    """Directly request https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices and discover feed endpoints."""
+    """Directly request https://www.lbma.org.uk/prices-and-data/lbma-precious-metal-prices for Gold, Silver & Platinum."""
     gold_url = DEFAULT_LBMA_GOLD_URL
     silver_url = DEFAULT_LBMA_SILVER_URL
+    platinum_url = DEFAULT_LBMA_PLATINUM_URL
     status_str = "Connected"
     try:
         print(f"Scraping LBMA Precious Metal Prices page: {LBMA_PORTAL_URL}")
@@ -41,22 +47,15 @@ def scrape_lbma_portal_endpoints():
         resp.raise_for_status()
         html_text = resp.text
         status_str = f"HTTP {resp.status_code} ({len(html_text)} bytes)"
-
-        found_gold = re.findall(r"https://prices\.lbma\.org\.uk/json/gold_pm\.json", html_text)
-        found_silver = re.findall(r"https://prices\.lbma\.org\.uk/json/silver\.json", html_text)
-        if found_gold:
-            gold_url = found_gold[0]
-        if found_silver:
-            silver_url = found_silver[0]
     except Exception as e:
         print(f"Note: Direct HTML inspection of {LBMA_PORTAL_URL} returned: {e}")
         status_str = "Direct Feed Mode"
-    return gold_url, silver_url, status_str
+    return gold_url, silver_url, platinum_url, status_str
 
 def fetch_lbma_monthly_series(json_url, col_name, decimals=2):
     """Fetch daily USD auction prices from LBMA feed and aggregate into monthly averages."""
     try:
-        print(f"Fetching LBMA data stream from: {json_url}")
+        print(f"Fetching LBMA stream ({col_name}) from: {json_url}")
         resp = requests.get(json_url, headers=HEADERS, timeout=45)
         resp.raise_for_status()
         records = resp.json()
@@ -78,6 +77,47 @@ def fetch_lbma_monthly_series(json_url, col_name, decimals=2):
     except Exception as e:
         print(f"Warning: LBMA fetch failed for {col_name}: {e}")
         return pd.DataFrame(columns=["Date", col_name])
+
+def scrape_steel_14057_surcharges():
+    """Scrape monthly 1.4057 alloy surcharges (€/kg) from European bar surcharge table."""
+    rows = list()
+    try:
+        print(f"Scraping 1.4057 Alloy Surcharge from: {STEEL_14057_URL}")
+        resp = requests.get(STEEL_14057_URL, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        # Match patterns like: 12.2025 0,87 1,13 (where 1st col is 1.4021 and 2nd col is 1.4057)
+        matches = re.findall(r"(\d{2})\.(\d{4})\s+\d+[,\.]\d+\s+(\d+[,\.]\d+)", resp.text)
+        for m_str, y_str, val_str in matches:
+            date_key = f"{y_str}-{m_str}"
+            val_float = round(float(val_str.replace(",", ".")), 2)
+            rows.append({"Date": date_key, "Steel14057": val_float})
+    except Exception as e:
+        print(f"Warning: Could not scrape 1.4057 surcharge page: {e}")
+    if not rows:
+        return pd.DataFrame(columns=["Date", "Steel14057"])
+    return pd.DataFrame(rows).drop_duplicates(subset=["Date"])
+
+def scrape_chinatungsten_article():
+    """Scrape 65% Wolframite Concentrate price from the specified ChinaTungsten article (no fabrication)."""
+    rows = list()
+    try:
+        print(f"Scraping ChinaTungsten article: {CHINATUNGSTEN_URL}")
+        resp = requests.get(CHINATUNGSTEN_URL, headers=HEADERS, timeout=25)
+        resp.encoding = "utf-8"
+        text = resp.text
+        # Extract publication year-month (e.g. 2026年1月22日) and 65%黑钨精矿价格报53万元/标吨
+        date_match = re.search(r"(\d{4})年(\d{1,2})月(\d{1,2})日", text)
+        price_match = re.search(r"65%黑钨精矿价格报\s*(\d+(?:\.\d+)?)\s*万元", text)
+        if date_match and price_match:
+            y_str = date_match.group(1)
+            m_str = str(int(date_match.group(2))).zfill(2)
+            rmb_per_ton = round(float(price_match.group(1)) * 10000)
+            rows.append({"Date": f"{y_str}-{m_str}", "Tungsten65": rmb_per_ton})
+    except Exception as e:
+        print(f"Warning: ChinaTungsten article unreachable from runner: {e}")
+    if not rows:
+        return pd.DataFrame(columns=["Date", "Tungsten65"])
+    return pd.DataFrame(rows).drop_duplicates(subset=["Date"])
 
 def download_pinksheet_excel():
     for doc_id in (DOC_ID_2026, DOC_ID_2025):
@@ -103,7 +143,7 @@ def filter_semi_annual_and_monthly(df):
     return filtered
 
 def build_combined_dataset():
-    gold_url, silver_url, lbma_status = scrape_lbma_portal_endpoints()
+    gold_url, silver_url, platinum_url, lbma_status = scrape_lbma_portal_endpoints()
     content, active_doc_id, base_url = download_pinksheet_excel()
 
     df = pd.read_excel(io.BytesIO(content), sheet_name="Monthly Prices", skiprows=4)
@@ -118,16 +158,22 @@ def build_combined_dataset():
     for wb_col, target_col in COLUMN_MAPPING.items():
         matched = [c for c in df.columns if str(c).strip().startswith(wb_col)]
         if matched:
-            decimals = 0 if target_col in ("Gold", "Aluminium", "Copper", "Tin") else 2
+            decimals = 0 if target_col in ("Gold", "Platinum", "Aluminium", "Copper", "Tin") else 2
             selected[target_col] = pd.to_numeric(df[matched[0]], errors="coerce").round(decimals)
 
     wb_df = pd.DataFrame(selected)
 
     lbma_gold = fetch_lbma_monthly_series(gold_url, "Gold_LBMA", decimals=0)
     lbma_silver = fetch_lbma_monthly_series(silver_url, "Silver_LBMA", decimals=2)
+    lbma_plat = fetch_lbma_monthly_series(platinum_url, "Platinum_LBMA", decimals=0)
+    steel_df = scrape_steel_14057_surcharges()
+    tungsten_df = scrape_chinatungsten_article()
 
     merged = pd.merge(wb_df, lbma_gold, on="Date", how="outer")
     merged = pd.merge(merged, lbma_silver, on="Date", how="outer")
+    merged = pd.merge(merged, lbma_plat, on="Date", how="outer")
+    merged = pd.merge(merged, steel_df, on="Date", how="outer")
+    merged = pd.merge(merged, tungsten_df, on="Date", how="outer")
 
     if "Gold_LBMA" in merged.columns:
         merged["Gold"] = merged["Gold_LBMA"].combine_first(merged.get("Gold"))
@@ -135,24 +181,26 @@ def build_combined_dataset():
     if "Silver_LBMA" in merged.columns:
         merged["Silver"] = merged["Silver_LBMA"].combine_first(merged.get("Silver"))
         merged.drop(columns=["Silver_LBMA"], inplace=True)
+    if "Platinum_LBMA" in merged.columns:
+        merged["Platinum"] = merged["Platinum_LBMA"].combine_first(merged.get("Platinum"))
+        merged.drop(columns=["Platinum_LBMA"], inplace=True)
 
     final_df = filter_semi_annual_and_monthly(merged)
-    return final_df, active_doc_id, base_url, gold_url, silver_url, lbma_status
+    return final_df, active_doc_id, base_url, lbma_status
 
 def main():
     os.makedirs("data", exist_ok=True)
-    final_df, active_doc_id, base_url, gold_url, silver_url, lbma_status = build_combined_dataset()
+    final_df, active_doc_id, base_url, lbma_status = build_combined_dataset()
 
     payload = {
         "metadata": {
             "document_id": active_doc_id,
             "lbma_portal": LBMA_PORTAL_URL,
             "lbma_status": lbma_status,
-            "lbma_gold_feed": gold_url,
-            "lbma_silver_feed": silver_url,
+            "steel_14057_source": STEEL_14057_URL,
+            "chinatungsten_source": CHINATUNGSTEN_URL,
             "source_portal": f"{base_url}/",
             "source_monthly_xlsx": f"{base_url}/related/CMO-Historical-Data-Monthly.xlsx",
-            "source_latest_pdf": f"{base_url}/related/CMO-Pink-Sheet-October-2026.pdf",
             "fetched_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
             "row_count": len(final_df)
         },
