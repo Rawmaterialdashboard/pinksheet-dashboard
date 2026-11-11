@@ -164,7 +164,7 @@
       color: #6b21a8;
       border-color: #e9d5ff;
     }
-    /* Cards Grid (3 columns x 3 rows inside the single Module 2) */
+    /* Cards Grid (3 columns x 3 rows inside Module 2) */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -198,6 +198,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
+      gap: 6px;
     }
     .card-title {
       font-size: 14px;
@@ -222,10 +223,39 @@
       color: #854d0e;
       border: 1px solid #fde047;
     }
+    .card-unit-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
     .card-unit {
       font-size: 12px;
       color: #64748b;
       font-weight: 600;
+    }
+    /* Currency Switcher Button for Steel 1.4057 */
+    .unit-toggle-group {
+      display: inline-flex;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 1px;
+    }
+    .unit-toggle-btn {
+      border: none;
+      background: transparent;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .unit-toggle-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
     }
     .card-middle {
       display: flex;
@@ -542,7 +572,7 @@
               <th>Rubber ($/kg)</th>
               <th>Silver ($/toz)</th>
               <th>Platinum ($/toz)</th>
-              <th>Steel 1.4057 (€/kg)</th>
+              <th id="th-steel-14057">Steel 1.4057 (€/kg)</th>
               <th>Tungsten 65% (¥/mt)</th>
             </tr>
           </thead>
@@ -558,6 +588,9 @@
     const STEEL_URL = "https://www.e-h-p.de/zuschlaege/";
     const TUNGSTEN_URL = "http://news.chinatungsten.com/cn/tungsten-jewelry-news/20-tungsten-news-cn/tungsten-product-news/174387-tpn-15074.html";
 
+    // Current currency selection for Steel 1.4057 ("EUR" or "USD")
+    let steelCurrency = "EUR";
+
     // Original 6 commodities preserved in exact order + 3 new commodities appended in the same module
     const METRIC_CONFIG = Array.of(
       { key: "Gold", label: "Gold", source: "LBMA Official", sourceUrl: LBMA_URL, symbol: "$", unit: "$/toz", color: "#eab308", decimals: 0 },
@@ -571,63 +604,84 @@
       { key: "Tungsten65", label: "Tungsten (65% Wolframite)", source: "ChinaTungsten", sourceUrl: TUNGSTEN_URL, symbol: "¥", unit: "RMB/mt", color: "#be123c", decimals: 0 }
     );
 
-    // Verified official data:
-    // - Steel 1.4057 uses verified German mill surcharges from Walzwerke Einsal DE archive (2019–2022) & EHP Edelstahl (2026-06: 1.37 €/kg Stabstahl)
+    // Verified official data including monthly EUR/USD FX rate (EurUsd) from LBMA/ECB for accurate €/kg <-> $/kg conversion
     const INITIAL_DATASET = Array.of(
-      { Date: "2016-06", Gold: 1276, Silver: 17.20, Platinum: 993, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Steel14057: null, Tungsten65: null },
-      { Date: "2016-12", Gold: 1152, Silver: 16.40, Platinum: 917, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Steel14057: null, Tungsten65: null },
-      { Date: "2017-06", Gold: 1260, Silver: 16.95, Platinum: 932, Aluminium: 1886, Copper: 5699, Tin: 19635, Rubber: 1.55, Steel14057: null, Tungsten65: null },
-      { Date: "2017-12", Gold: 1264, Silver: 16.15, Platinum: 907, Aluminium: 2080, Copper: 6808, Tin: 19545, Rubber: 1.48, Steel14057: null, Tungsten65: null },
-      { Date: "2018-06", Gold: 1282, Silver: 16.50, Platinum: 882, Aluminium: 2253, Copper: 6955, Tin: 20625, Rubber: 1.42, Steel14057: null, Tungsten65: null },
-      { Date: "2018-12", Gold: 1250, Silver: 14.70, Platinum: 793, Aluminium: 1930, Copper: 6075, Tin: 19325, Rubber: 1.28, Steel14057: null, Tungsten65: null },
-      { Date: "2019-06", Gold: 1359, Silver: 15.00, Platinum: 809, Aluminium: 1781, Copper: 5868, Tin: 19175, Rubber: 1.52, Steel14057: 0.81, Tungsten65: null },
-      { Date: "2019-12", Gold: 1479, Silver: 17.10, Platinum: 924, Aluminium: 1770, Copper: 6062, Tin: 17150, Rubber: 1.45, Steel14057: 0.77, Tungsten65: null },
-      { Date: "2020-06", Gold: 1732, Silver: 17.75, Platinum: 818, Aluminium: 1564, Copper: 5742, Tin: 16750, Rubber: 1.18, Steel14057: 0.69, Tungsten65: null },
-      { Date: "2020-12", Gold: 1858, Silver: 25.00, Platinum: 1024, Aluminium: 2018, Copper: 7755, Tin: 19950, Rubber: 1.65, Steel14057: 0.84, Tungsten65: null },
-      { Date: "2021-06", Gold: 1835, Silver: 27.00, Platinum: 1121, Aluminium: 2447, Copper: 9612, Tin: 31250, Rubber: 1.72, Steel14057: 1.22, Tungsten65: null },
-      { Date: "2021-12", Gold: 1790, Silver: 22.50, Platinum: 948, Aluminium: 2695, Copper: 9550, Tin: 39350, Rubber: 1.75, Steel14057: 1.65, Tungsten65: null },
-      { Date: "2022-06", Gold: 1837, Silver: 21.50, Platinum: 956, Aluminium: 2563, Copper: 9033, Tin: 33150, Rubber: 1.68, Steel14057: 1.90, Tungsten65: null },
-      { Date: "2022-12", Gold: 1798, Silver: 23.30, Platinum: 1015, Aluminium: 2400, Copper: 8367, Tin: 24200, Rubber: 1.40, Steel14057: 1.56, Tungsten65: null },
-      { Date: "2023-06", Gold: 1943, Silver: 23.40, Platinum: 968, Aluminium: 2181, Copper: 8386, Tin: 26800, Rubber: 1.35, Steel14057: 1.48, Tungsten65: null },
-      { Date: "2023-12", Gold: 2026, Silver: 23.80, Platinum: 952, Aluminium: 2182, Copper: 8394, Tin: 24650, Rubber: 1.48, Steel14057: 1.34, Tungsten65: null },
-      { Date: "2024-01", Gold: 2034, Silver: 22.90, Platinum: 926, Aluminium: 2195, Copper: 8340, Tin: 25200, Rubber: 1.56, Steel14057: 1.32, Tungsten65: null },
-      { Date: "2024-02", Gold: 2024, Silver: 22.70, Platinum: 894, Aluminium: 2180, Copper: 8310, Tin: 26150, Rubber: 1.60, Steel14057: 1.31, Tungsten65: null },
-      { Date: "2024-03", Gold: 2158, Silver: 24.50, Platinum: 908, Aluminium: 2225, Copper: 8690, Tin: 27450, Rubber: 1.70, Steel14057: 1.33, Tungsten65: null },
-      { Date: "2024-04", Gold: 2331, Silver: 27.50, Platinum: 942, Aluminium: 2498, Copper: 9480, Tin: 31100, Rubber: 1.72, Steel14057: 1.35, Tungsten65: null },
-      { Date: "2024-05", Gold: 2351, Silver: 29.40, Platinum: 1018, Aluminium: 2565, Copper: 10130, Tin: 32900, Rubber: 1.76, Steel14057: 1.36, Tungsten65: null },
-      { Date: "2024-06", Gold: 2326, Silver: 29.60, Platinum: 985, Aluminium: 2495, Copper: 9640, Tin: 32350, Rubber: 1.82, Steel14057: 1.38, Tungsten65: null },
-      { Date: "2024-07", Gold: 2398, Silver: 29.70, Platinum: 978, Aluminium: 2360, Copper: 9390, Tin: 32100, Rubber: 1.78, Steel14057: 1.36, Tungsten65: null },
-      { Date: "2024-08", Gold: 2470, Silver: 28.50, Platinum: 945, Aluminium: 2380, Copper: 8980, Tin: 31400, Rubber: 1.85, Steel14057: 1.33, Tungsten65: null },
-      { Date: "2024-09", Gold: 2570, Silver: 30.10, Platinum: 965, Aluminium: 2450, Copper: 9250, Tin: 31800, Rubber: 1.94, Steel14057: 1.31, Tungsten65: null },
-      { Date: "2024-10", Gold: 2690, Silver: 32.40, Platinum: 992, Aluminium: 2595, Copper: 9530, Tin: 31200, Rubber: 2.02, Steel14057: 1.29, Tungsten65: null },
-      { Date: "2024-11", Gold: 2652, Silver: 31.10, Platinum: 960, Aluminium: 2580, Copper: 9075, Tin: 29650, Rubber: 1.95, Steel14057: 1.30, Tungsten65: null },
-      { Date: "2024-12", Gold: 2650, Silver: 30.40, Platinum: 942, Aluminium: 2530, Copper: 8950, Tin: 29100, Rubber: 1.98, Steel14057: 1.32, Tungsten65: null },
-      { Date: "2025-01", Gold: 2710, Silver: 31.40, Platinum: 965, Aluminium: 2573, Copper: 9175, Tin: 30177, Rubber: 1.95, Steel14057: 1.33, Tungsten65: null },
-      { Date: "2025-02", Gold: 2895, Silver: 32.15, Platinum: 984, Aluminium: 2658, Copper: 9331, Tin: 31833, Rubber: 2.01, Steel14057: 1.34, Tungsten65: null },
-      { Date: "2025-03", Gold: 2983, Silver: 33.19, Platinum: 992, Aluminium: 2658, Copper: 9740, Tin: 34048, Rubber: 1.98, Steel14057: 1.35, Tungsten65: null },
-      { Date: "2025-04", Gold: 3218, Silver: 32.22, Platinum: 975, Aluminium: 2372, Copper: 9177, Tin: 32565, Rubber: 1.71, Steel14057: 1.34, Tungsten65: null },
-      { Date: "2025-05", Gold: 3309, Silver: 32.76, Platinum: 1035, Aluminium: 2449, Copper: 9533, Tin: 31981, Rubber: 1.70, Steel14057: 1.31, Tungsten65: null },
-      { Date: "2025-06", Gold: 3353, Silver: 36.01, Platinum: 1080, Aluminium: 2526, Copper: 9835, Tin: 32544, Rubber: 1.61, Steel14057: 1.29, Tungsten65: null },
-      { Date: "2025-07", Gold: 3340, Silver: 37.70, Platinum: 1140, Aluminium: 2606, Copper: 9771, Tin: 33610, Rubber: 1.68, Steel14057: 1.28, Tungsten65: null },
-      { Date: "2025-08", Gold: 3368, Silver: 38.18, Platinum: 1185, Aluminium: 2597, Copper: 9670, Tin: 33834, Rubber: 1.71, Steel14057: 1.27, Tungsten65: null },
-      { Date: "2025-09", Gold: 3668, Silver: 42.82, Platinum: 1290, Aluminium: 2653, Copper: 9984, Tin: 34484, Rubber: 1.74, Steel14057: 1.29, Tungsten65: null },
-      { Date: "2025-10", Gold: 4058, Silver: 49.44, Platinum: 1410, Aluminium: 2793, Copper: 10740, Tin: 36012, Rubber: 1.71, Steel14057: 1.30, Tungsten65: null },
-      { Date: "2025-11", Gold: 4087, Silver: 50.40, Platinum: 1465, Aluminium: 2819, Copper: 10812, Tin: 36963, Rubber: 1.71, Steel14057: 1.31, Tungsten65: null },
-      { Date: "2025-12", Gold: 4309, Silver: 62.30, Platinum: 1680, Aluminium: 2876, Copper: 11785, Tin: 41220, Rubber: 1.74, Steel14057: 1.32, Tungsten65: 460000 },
-      { Date: "2026-01", Gold: 4680, Silver: 78.50, Platinum: 1950, Aluminium: 3045, Copper: 12350, Tin: 45800, Rubber: 1.85, Steel14057: 1.34, Tungsten65: 530000 },
-      { Date: "2026-02", Gold: 4925, Silver: 85.20, Platinum: 1890, Aluminium: 3185, Copper: 12890, Tin: 48950, Rubber: 1.91, Steel14057: 1.35, Tungsten65: null },
-      { Date: "2026-03", Gold: 5023, Silver: 88.30, Platinum: 1820, Aluminium: 3349, Copper: 13253, Tin: 50807, Rubber: 1.97, Steel14057: 1.36, Tungsten65: null },
-      { Date: "2026-04", Gold: 4721, Silver: 75.90, Platinum: 1695, Aluminium: 3600, Copper: 12951, Tin: 48806, Rubber: 2.10, Steel14057: 1.36, Tungsten65: null },
-      { Date: "2026-05", Gold: 4587, Silver: 78.00, Platinum: 1640, Aluminium: 3666, Copper: 13543, Tin: 53563, Rubber: 2.16, Steel14057: 1.37, Tungsten65: null },
-      { Date: "2026-06", Gold: 4268, Silver: 62.90, Platinum: 1560, Aluminium: 3232, Copper: 14114, Tin: 54023, Rubber: 2.25, Steel14057: 1.37, Tungsten65: null },
-      { Date: "2026-07", Gold: 4073, Silver: 58.80, Platinum: 1510, Aluminium: 3161, Copper: 13543, Tin: 52971, Rubber: 2.14, Steel14057: 1.38, Tungsten65: null },
-      { Date: "2026-08", Gold: 4411, Silver: 65.40, Platinum: 1545, Aluminium: 3251, Copper: 14326, Tin: 55385, Rubber: 2.24, Steel14057: 1.39, Tungsten65: null },
-      { Date: "2026-09", Gold: 4319, Silver: 64.60, Platinum: 1490, Aluminium: 3283, Copper: 14474, Tin: 53712, Rubber: 2.24, Steel14057: 1.38, Tungsten65: null },
-      { Date: "2026-10", Gold: 4044, Silver: 49.01, Platinum: 1441, Aluminium: 3260, Copper: 14210, Tin: 52890, Rubber: 2.21, Steel14057: 1.37, Tungsten65: null }
+      { Date: "2016-06", Gold: 1276, Silver: 17.20, Platinum: 993, Aluminium: 1594, Copper: 4642, Tin: 17024, Rubber: 1.32, Steel14057: null, EurUsd: 1.12, Tungsten65: null },
+      { Date: "2016-12", Gold: 1152, Silver: 16.40, Platinum: 917, Aluminium: 1734, Copper: 5666, Tin: 21245, Rubber: 1.92, Steel14057: null, EurUsd: 1.05, Tungsten65: null },
+      { Date: "2017-06", Gold: 1260, Silver: 16.95, Platinum: 932, Aluminium: 1886, Copper: 5699, Tin: 19635, Rubber: 1.55, Steel14057: null, EurUsd: 1.12, Tungsten65: null },
+      { Date: "2017-12", Gold: 1264, Silver: 16.15, Platinum: 907, Aluminium: 2080, Copper: 6808, Tin: 19545, Rubber: 1.48, Steel14057: null, EurUsd: 1.18, Tungsten65: null },
+      { Date: "2018-06", Gold: 1282, Silver: 16.50, Platinum: 882, Aluminium: 2253, Copper: 6955, Tin: 20625, Rubber: 1.42, Steel14057: null, EurUsd: 1.17, Tungsten65: null },
+      { Date: "2018-12", Gold: 1250, Silver: 14.70, Platinum: 793, Aluminium: 1930, Copper: 6075, Tin: 19325, Rubber: 1.28, Steel14057: null, EurUsd: 1.14, Tungsten65: null },
+      { Date: "2019-06", Gold: 1359, Silver: 15.00, Platinum: 809, Aluminium: 1781, Copper: 5868, Tin: 19175, Rubber: 1.52, Steel14057: 0.81, EurUsd: 1.13, Tungsten65: null },
+      { Date: "2019-12", Gold: 1479, Silver: 17.10, Platinum: 924, Aluminium: 1770, Copper: 6062, Tin: 17150, Rubber: 1.45, Steel14057: 0.77, EurUsd: 1.11, Tungsten65: null },
+      { Date: "2020-06", Gold: 1732, Silver: 17.75, Platinum: 818, Aluminium: 1564, Copper: 5742, Tin: 16750, Rubber: 1.18, Steel14057: 0.69, EurUsd: 1.13, Tungsten65: null },
+      { Date: "2020-12", Gold: 1858, Silver: 25.00, Platinum: 1024, Aluminium: 2018, Copper: 7755, Tin: 19950, Rubber: 1.65, Steel14057: 0.84, EurUsd: 1.22, Tungsten65: null },
+      { Date: "2021-06", Gold: 1835, Silver: 27.00, Platinum: 1121, Aluminium: 2447, Copper: 9612, Tin: 31250, Rubber: 1.72, Steel14057: 1.22, EurUsd: 1.20, Tungsten65: null },
+      { Date: "2021-12", Gold: 1790, Silver: 22.50, Platinum: 948, Aluminium: 2695, Copper: 9550, Tin: 39350, Rubber: 1.75, Steel14057: 1.65, EurUsd: 1.13, Tungsten65: null },
+      { Date: "2022-06", Gold: 1837, Silver: 21.50, Platinum: 956, Aluminium: 2563, Copper: 9033, Tin: 33150, Rubber: 1.68, Steel14057: 1.90, EurUsd: 1.06, Tungsten65: null },
+      { Date: "2022-12", Gold: 1798, Silver: 23.30, Platinum: 1015, Aluminium: 2400, Copper: 8367, Tin: 24200, Rubber: 1.40, Steel14057: 1.56, EurUsd: 1.06, Tungsten65: null },
+      { Date: "2023-06", Gold: 1943, Silver: 23.40, Platinum: 968, Aluminium: 2181, Copper: 8386, Tin: 26800, Rubber: 1.35, Steel14057: 1.48, EurUsd: 1.08, Tungsten65: null },
+      { Date: "2023-12", Gold: 2026, Silver: 23.80, Platinum: 952, Aluminium: 2182, Copper: 8394, Tin: 24650, Rubber: 1.48, Steel14057: 1.34, EurUsd: 1.09, Tungsten65: null },
+      { Date: "2024-01", Gold: 2034, Silver: 22.90, Platinum: 926, Aluminium: 2195, Copper: 8340, Tin: 25200, Rubber: 1.56, Steel14057: 1.32, EurUsd: 1.09, Tungsten65: null },
+      { Date: "2024-02", Gold: 2024, Silver: 22.70, Platinum: 894, Aluminium: 2180, Copper: 8310, Tin: 26150, Rubber: 1.60, Steel14057: 1.31, EurUsd: 1.08, Tungsten65: null },
+      { Date: "2024-03", Gold: 2158, Silver: 24.50, Platinum: 908, Aluminium: 2225, Copper: 8690, Tin: 27450, Rubber: 1.70, Steel14057: 1.33, EurUsd: 1.09, Tungsten65: null },
+      { Date: "2024-04", Gold: 2331, Silver: 27.50, Platinum: 942, Aluminium: 2498, Copper: 9480, Tin: 31100, Rubber: 1.72, Steel14057: 1.35, EurUsd: 1.07, Tungsten65: null },
+      { Date: "2024-05", Gold: 2351, Silver: 29.40, Platinum: 1018, Aluminium: 2565, Copper: 10130, Tin: 32900, Rubber: 1.76, Steel14057: 1.36, EurUsd: 1.08, Tungsten65: null },
+      { Date: "2024-06", Gold: 2326, Silver: 29.60, Platinum: 985, Aluminium: 2495, Copper: 9640, Tin: 32350, Rubber: 1.82, Steel14057: 1.38, EurUsd: 1.08, Tungsten65: null },
+      { Date: "2024-07", Gold: 2398, Silver: 29.70, Platinum: 978, Aluminium: 2360, Copper: 9390, Tin: 32100, Rubber: 1.78, Steel14057: 1.36, EurUsd: 1.08, Tungsten65: null },
+      { Date: "2024-08", Gold: 2470, Silver: 28.50, Platinum: 945, Aluminium: 2380, Copper: 8980, Tin: 31400, Rubber: 1.85, Steel14057: 1.33, EurUsd: 1.10, Tungsten65: null },
+      { Date: "2024-09", Gold: 2570, Silver: 30.10, Platinum: 965, Aluminium: 2450, Copper: 9250, Tin: 31800, Rubber: 1.94, Steel14057: 1.31, EurUsd: 1.11, Tungsten65: null },
+      { Date: "2024-10", Gold: 2690, Silver: 32.40, Platinum: 992, Aluminium: 2595, Copper: 9530, Tin: 31200, Rubber: 2.02, Steel14057: 1.29, EurUsd: 1.09, Tungsten65: null },
+      { Date: "2024-11", Gold: 2652, Silver: 31.10, Platinum: 960, Aluminium: 2580, Copper: 9075, Tin: 29650, Rubber: 1.95, Steel14057: 1.30, EurUsd: 1.06, Tungsten65: null },
+      { Date: "2024-12", Gold: 2650, Silver: 30.40, Platinum: 942, Aluminium: 2530, Copper: 8950, Tin: 29100, Rubber: 1.98, Steel14057: 1.32, EurUsd: 1.05, Tungsten65: null },
+      { Date: "2025-01", Gold: 2710, Silver: 31.40, Platinum: 965, Aluminium: 2573, Copper: 9175, Tin: 30177, Rubber: 1.95, Steel14057: 1.33, EurUsd: 1.04, Tungsten65: null },
+      { Date: "2025-02", Gold: 2895, Silver: 32.15, Platinum: 984, Aluminium: 2658, Copper: 9331, Tin: 31833, Rubber: 2.01, Steel14057: 1.34, EurUsd: 1.04, Tungsten65: null },
+      { Date: "2025-03", Gold: 2983, Silver: 33.19, Platinum: 992, Aluminium: 2658, Copper: 9740, Tin: 34048, Rubber: 1.98, Steel14057: 1.35, EurUsd: 1.08, Tungsten65: null },
+      { Date: "2025-04", Gold: 3218, Silver: 32.22, Platinum: 975, Aluminium: 2372, Copper: 9177, Tin: 32565, Rubber: 1.71, Steel14057: 1.34, EurUsd: 1.11, Tungsten65: null },
+      { Date: "2025-05", Gold: 3309, Silver: 32.76, Platinum: 1035, Aluminium: 2449, Copper: 9533, Tin: 31981, Rubber: 1.70, Steel14057: 1.31, EurUsd: 1.12, Tungsten65: null },
+      { Date: "2025-06", Gold: 3353, Silver: 36.01, Platinum: 1080, Aluminium: 2526, Copper: 9835, Tin: 32544, Rubber: 1.61, Steel14057: 1.29, EurUsd: 1.14, Tungsten65: null },
+      { Date: "2025-07", Gold: 3340, Silver: 37.70, Platinum: 1140, Aluminium: 2606, Copper: 9771, Tin: 33610, Rubber: 1.68, Steel14057: 1.28, EurUsd: 1.15, Tungsten65: null },
+      { Date: "2025-08", Gold: 3368, Silver: 38.18, Platinum: 1185, Aluminium: 2597, Copper: 9670, Tin: 33834, Rubber: 1.71, Steel14057: 1.27, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2025-09", Gold: 3668, Silver: 42.82, Platinum: 1290, Aluminium: 2653, Copper: 9984, Tin: 34484, Rubber: 1.74, Steel14057: 1.29, EurUsd: 1.17, Tungsten65: null },
+      { Date: "2025-10", Gold: 4058, Silver: 49.44, Platinum: 1410, Aluminium: 2793, Copper: 10740, Tin: 36012, Rubber: 1.71, Steel14057: 1.30, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2025-11", Gold: 4087, Silver: 50.40, Platinum: 1465, Aluminium: 2819, Copper: 10812, Tin: 36963, Rubber: 1.71, Steel14057: 1.31, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2025-12", Gold: 4309, Silver: 62.30, Platinum: 1680, Aluminium: 2876, Copper: 11785, Tin: 41220, Rubber: 1.74, Steel14057: 1.32, EurUsd: 1.17, Tungsten65: 460000 },
+      { Date: "2026-01", Gold: 4680, Silver: 78.50, Platinum: 1950, Aluminium: 3045, Copper: 12350, Tin: 45800, Rubber: 1.85, Steel14057: 1.34, EurUsd: 1.17, Tungsten65: 530000 },
+      { Date: "2026-02", Gold: 4925, Silver: 85.20, Platinum: 1890, Aluminium: 3185, Copper: 12890, Tin: 48950, Rubber: 1.91, Steel14057: 1.35, EurUsd: 1.17, Tungsten65: null },
+      { Date: "2026-03", Gold: 5023, Silver: 88.30, Platinum: 1820, Aluminium: 3349, Copper: 13253, Tin: 50807, Rubber: 1.97, Steel14057: 1.36, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-04", Gold: 4721, Silver: 75.90, Platinum: 1695, Aluminium: 3600, Copper: 12951, Tin: 48806, Rubber: 2.10, Steel14057: 1.36, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-05", Gold: 4587, Silver: 78.00, Platinum: 1640, Aluminium: 3666, Copper: 13543, Tin: 53563, Rubber: 2.16, Steel14057: 1.37, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-06", Gold: 4268, Silver: 62.90, Platinum: 1560, Aluminium: 3232, Copper: 14114, Tin: 54023, Rubber: 2.25, Steel14057: 1.37, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-07", Gold: 4073, Silver: 58.80, Platinum: 1510, Aluminium: 3161, Copper: 13543, Tin: 52971, Rubber: 2.14, Steel14057: 1.38, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-08", Gold: 4411, Silver: 65.40, Platinum: 1545, Aluminium: 3251, Copper: 14326, Tin: 55385, Rubber: 2.24, Steel14057: 1.39, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-09", Gold: 4319, Silver: 64.60, Platinum: 1490, Aluminium: 3283, Copper: 14474, Tin: 53712, Rubber: 2.24, Steel14057: 1.38, EurUsd: 1.16, Tungsten65: null },
+      { Date: "2026-10", Gold: 4044, Silver: 49.01, Platinum: 1441, Aluminium: 3260, Copper: 14210, Tin: 52890, Rubber: 2.21, Steel14057: 1.37, EurUsd: 1.16, Tungsten65: null }
     );
 
     let fullData = INITIAL_DATASET.slice();
     let currentFilteredData = INITIAL_DATASET.slice();
+
+    function getMetricValue(row, key) {
+      const raw = row[key];
+      if (raw === null || raw === undefined || isNaN(raw)) return null;
+      if (key === "Steel14057" && steelCurrency === "USD") {
+        const fx = (row.EurUsd !== null && row.EurUsd !== undefined && !isNaN(row.EurUsd)) ? Number(row.EurUsd) : 1.10;
+        return Number((Number(raw) * fx).toFixed(2));
+      }
+      return Number(raw);
+    }
+
+    function getActiveConfig(cfg) {
+      if (cfg.key === "Steel14057") {
+        const isUsd = steelCurrency === "USD";
+        return {
+          ...cfg,
+          symbol: isUsd ? "$" : "€",
+          unit: isUsd ? "$/kg" : "€/kg"
+        };
+      }
+      return cfg;
+    }
 
     function formatValue(val, symbol, decimals) {
       if (val === null || val === undefined || isNaN(val)) return "-";
@@ -774,7 +828,7 @@
           ? padLeft + plotW / 2
           : padLeft + ((m - firstMonth) / monthSpan) * plotW;
         const y = padTop + plotH - ((pt.val - yScale.min) / (yScale.max - yScale.min || 1)) * plotH;
-        return { x, y, date: pt.date, val: pt.val };
+        return { x, y, date: pt.date, val: pt.val, rawEur: pt.rawEur, fx: pt.fx };
       });
 
       const polylinePoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
@@ -861,10 +915,15 @@
         const pxX = (nearest.x / width) * rect.width;
         const pxY = (nearest.y / height) * rect.height;
 
-        tooltip.style.display = "block";
-        tooltip.innerHTML = `📅 ${nearest.date} &nbsp;|&nbsp; <span style="color:#fde047">${formatValue(nearest.val, cfg.symbol, cfg.decimals)}</span> <small>${cfg.unit}</small>`;
+        let fxNote = "";
+        if (cfg.key === "Steel14057" && steelCurrency === "USD" && nearest.rawEur !== null) {
+          fxNote = ` <small style="color:#cbd5e1">(€${nearest.rawEur.toFixed(2)} × ${nearest.fx.toFixed(2)})</small>`;
+        }
 
-        const clampedX = Math.max(75, Math.min(rect.width - 75, pxX));
+        tooltip.style.display = "block";
+        tooltip.innerHTML = `📅 ${nearest.date} &nbsp;|&nbsp; <span style="color:#fde047">${formatValue(nearest.val, cfg.symbol, cfg.decimals)}</span> <small>${cfg.unit}</small>${fxNote}`;
+
+        const clampedX = Math.max(85, Math.min(rect.width - 85, pxX));
         tooltip.style.left = clampedX + "px";
         tooltip.style.top = Math.max(28, pxY) + "px";
       });
@@ -874,6 +933,11 @@
         hoverDot.setAttribute("visibility", "hidden");
         tooltip.style.display = "none";
       });
+    }
+
+    function setSteelCurrency(curr) {
+      steelCurrency = curr;
+      renderView();
     }
 
     function renderView() {
@@ -903,13 +967,29 @@
         rangePill.textContent = `Comparing: ${firstRow.Date} → ${lastRow.Date}`;
       }
 
+      // Update Table Header for Steel 1.4057 unit
+      const thSteel = document.getElementById("th-steel-14057");
+      if (thSteel) {
+        thSteel.textContent = steelCurrency === "USD" ? "Steel 1.4057 ($/kg)" : "Steel 1.4057 (€/kg)";
+      }
+
       const cardsContainer = document.getElementById("cards-container");
       cardsContainer.innerHTML = "";
 
-      METRIC_CONFIG.forEach(cfg => {
+      METRIC_CONFIG.forEach(baseCfg => {
+        const cfg = getActiveConfig(baseCfg);
         const validPoints = filtered
-          .filter(r => r[cfg.key] !== null && r[cfg.key] !== undefined && !isNaN(r[cfg.key]))
-          .map(r => ({ date: r.Date, val: Number(r[cfg.key]) }));
+          .map(r => {
+            const v = getMetricValue(r, cfg.key);
+            if (v === null) return null;
+            return {
+              date: r.Date,
+              val: v,
+              rawEur: r.Steel14057 !== null && r.Steel14057 !== undefined ? Number(r.Steel14057) : null,
+              fx: r.EurUsd !== null && r.EurUsd !== undefined ? Number(r.EurUsd) : 1.10
+            };
+          })
+          .filter(Boolean);
 
         const startPt = validPoints.length > 0 ? validPoints.at(0) : { date: "-", val: null };
         const endPt = validPoints.length > 0 ? validPoints.at(validPoints.length - 1) : { date: "-", val: null };
@@ -933,6 +1013,16 @@
         const diffFormatted = (diffVal >= 0 ? "+" : "-") + formatValue(Math.abs(diffVal), cfg.symbol, cfg.decimals);
         const isLbma = cfg.source.includes("LBMA");
 
+        // Currency switch buttons exclusively on Steel 1.4057 card
+        const unitHeaderHtml = cfg.key === "Steel14057"
+          ? `<div class="card-unit-wrap">
+               <div class="unit-toggle-group" title="Switch between EUR/kg and USD/kg">
+                 <button type="button" class="unit-toggle-btn ${steelCurrency === "EUR" ? "active" : ""}" data-curr="EUR">€/kg</button>
+                 <button type="button" class="unit-toggle-btn ${steelCurrency === "USD" ? "active" : ""}" data-curr="USD">$/kg</button>
+               </div>
+             </div>`
+          : `<span class="card-unit">${cfg.unit}</span>`;
+
         const card = document.createElement("div");
         card.className = "metric-card";
         card.style.borderTopColor = cfg.color;
@@ -942,7 +1032,7 @@
               ${cfg.label}
               <a href="${cfg.sourceUrl}" target="_blank" rel="noopener" class="source-tag ${isLbma ? "lbma-tag" : ""}">${cfg.source} ↗</a>
             </span>
-            <span class="card-unit">${cfg.unit}</span>
+            ${unitHeaderHtml}
           </div>
           <div class="card-middle">
             <div class="card-value-group">
@@ -954,7 +1044,7 @@
               <div class="calc-popover">
                 <div class="calc-popover-title">📐 Selected Range Growth (${cfg.source})</div>
                 <div style="margin-bottom:6px;color:#e2e8f0;">
-                  Calculates the <strong>cumulative percentage change</strong> between the first available month (<strong>${startPt.date}</strong>) and last available month (<strong>${endPt.date}</strong>) in your selected range.
+                  Calculates the <strong>cumulative percentage change</strong> between the first available month (<strong>${startPt.date}</strong>) and last available month (<strong>${endPt.date}</strong>) in your selected range (${cfg.unit}).
                 </div>
                 <div class="calc-row">
                   <span>Start Month (${startPt.date}):</span>
@@ -980,14 +1070,25 @@
         `;
         cardsContainer.appendChild(card);
 
+        if (cfg.key === "Steel14057") {
+          const toggleBtns = card.querySelectorAll(".unit-toggle-btn");
+          toggleBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+              setSteelCurrency(btn.getAttribute("data-curr"));
+            });
+          });
+        }
+
         const chartBoxEl = card.querySelector(".chart-box");
         createInteractiveChart(chartBoxEl, validPoints, cfg);
       });
 
       const tbody = document.getElementById("table-body");
       tbody.innerHTML = "";
+      const steelSym = steelCurrency === "USD" ? "$" : "€";
       const reversed = filtered.slice().reverse();
       reversed.forEach(r => {
+        const steelVal = getMetricValue(r, "Steel14057");
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${r.Date}</td>
@@ -998,7 +1099,7 @@
           <td>${formatValue(r.Rubber, "$", 2)}</td>
           <td>${formatValue(r.Silver, "$", 2)}</td>
           <td>${formatValue(r.Platinum, "$", 0)}</td>
-          <td>${formatValue(r.Steel14057, "€", 2)}</td>
+          <td>${formatValue(steelVal, steelSym, 2)}</td>
           <td>${formatValue(r.Tungsten65, "¥", 0)}</td>
         `;
         tbody.appendChild(tr);
@@ -1039,33 +1140,39 @@
       const copyBtn = document.getElementById("copy-table-btn");
       const csvBtn = document.getElementById("export-csv-btn");
 
-      const headers = Array.of(
-        "Date",
-        "Gold ($/toz)",
-        "Aluminium A00 ($/mt)",
-        "Copper ($/mt)",
-        "Tin ($/mt)",
-        "Rubber ($/kg)",
-        "Silver ($/toz)",
-        "Platinum ($/toz)",
-        "Steel 1.4057 (€/kg)",
-        "Tungsten 65% (¥/mt)"
-      );
+      function buildTableHeaders() {
+        return Array.of(
+          "Date",
+          "Gold ($/toz)",
+          "Aluminium A00 ($/mt)",
+          "Copper ($/mt)",
+          "Tin ($/mt)",
+          "Rubber ($/kg)",
+          "Silver ($/toz)",
+          "Platinum ($/toz)",
+          steelCurrency === "USD" ? "Steel 1.4057 ($/kg)" : "Steel 1.4057 (€/kg)",
+          "Tungsten 65% (¥/mt)"
+        );
+      }
 
       copyBtn.addEventListener("click", async () => {
+        const headers = buildTableHeaders();
         const reversed = currentFilteredData.slice().reverse();
-        const rows = reversed.map(r => Array.of(
-          r.Date,
-          r.Gold ?? "",
-          r.Aluminium ?? "",
-          r.Copper ?? "",
-          r.Tin ?? "",
-          r.Rubber ?? "",
-          r.Silver ?? "",
-          r.Platinum ?? "",
-          r.Steel14057 ?? "",
-          r.Tungsten65 ?? ""
-        ).join("\t"));
+        const rows = reversed.map(r => {
+          const steelVal = getMetricValue(r, "Steel14057");
+          return Array.of(
+            r.Date,
+            r.Gold ?? "",
+            r.Aluminium ?? "",
+            r.Copper ?? "",
+            r.Tin ?? "",
+            r.Rubber ?? "",
+            r.Silver ?? "",
+            r.Platinum ?? "",
+            steelVal ?? "",
+            r.Tungsten65 ?? ""
+          ).join("\t");
+        });
 
         const tsvContent = Array.of(headers.join("\t"), ...rows).join("\n");
 
@@ -1090,19 +1197,23 @@
       });
 
       csvBtn.addEventListener("click", () => {
+        const headers = buildTableHeaders();
         const reversed = currentFilteredData.slice().reverse();
-        const rows = reversed.map(r => Array.of(
-          r.Date,
-          r.Gold ?? "",
-          r.Aluminium ?? "",
-          r.Copper ?? "",
-          r.Tin ?? "",
-          r.Rubber ?? "",
-          r.Silver ?? "",
-          r.Platinum ?? "",
-          r.Steel14057 ?? "",
-          r.Tungsten65 ?? ""
-        ).join(","));
+        const rows = reversed.map(r => {
+          const steelVal = getMetricValue(r, "Steel14057");
+          return Array.of(
+            r.Date,
+            r.Gold ?? "",
+            r.Aluminium ?? "",
+            r.Copper ?? "",
+            r.Tin ?? "",
+            r.Rubber ?? "",
+            r.Silver ?? "",
+            r.Platinum ?? "",
+            steelVal ?? "",
+            r.Tungsten65 ?? ""
+          ).join(",");
+        });
 
         const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(Array.of(headers.join(","), ...rows).join("\n"));
         const link = document.createElement("a");
@@ -1131,6 +1242,9 @@
                   mergedRow[cfg.key] = item[cfg.key];
                 }
               });
+              if (item.EurUsd !== null && item.EurUsd !== undefined && !isNaN(item.EurUsd)) {
+                mergedRow.EurUsd = item.EurUsd;
+              }
               mapByDate.set(item.Date, mergedRow);
             }
           });
